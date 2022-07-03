@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Peisaje</title>
+    <link rel="stylesheet" href="categorii.css" />
+    <link rel="stylesheet" href="stars.css" />
+    <link rel="icon" type="image/x-icon" href="headers/image.png">
+    <script type="text/javascript" src="jquery.js"></script>
+</head>
+
+<body>
+    <div class="main"> 
+        <div id='stars2'></div> <!-- background cu stele -->
+        <div class="container"> <!-- div-ul parinte cu pozele -->
+            <h2 class="heading-text">Peisaje</h2><br> <!-- subtitlul paginii -->
+            <div class="image-gallery-stanga"> <!-- galeria este impartita in 2 parti: stanga si dreapta. Am facut asta pentru ca site-ul sa fie responsive(4 coloane la rezolutie mare, 2 coloane la rezolutie medie si 1 coloana la rezolutia cea mai mica) -->
+                <div class="column"> <!-- prima coloana -->
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/1.jpg" loading="lazy" alt="1/250, f/5.6, ISO 200, 36mm"/>
+                        </div>
+                    </a>
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/2.jpg" loading="lazy" alt="1/200, f/5.6, ISO 100, 28mm"/>
+                        </div>
+                    </a>
+                </div>
+                <div class="column">
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/3.jpg" loading="lazy" alt="1/160, f/11, ISO 100, 70mm"/>
+                        </div>
+                    </a>
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/4.jpg" loading="lazy" alt="1/640, f/4.5, ISO 1600, 70mm"/>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="image-gallery-dreapta">
+                <div class="column">
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/5.jpg" loading="lazy" alt="1/125, f/11, ISO 110, 55mm"/>
+                        </div>
+                    </a>
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/6.jpg" loading="lazy" alt="1/160, f/11, ISO 100, 28mm"/>
+                        </div>
+                    </a>
+                </div>
+                <div class="column">
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/7.jpg" loading="lazy" alt="1/60, f/10, ISO 280, 25mm"/>
+                        </div>
+                    </a>
+                    <a>
+                        <div class="image-item">
+                            <img class="myImages" id="myImg" src="Fotografii/peisaje/8.jpg" loading="lazy" alt="1/400, f/4.8, ISO 400, 95mm"/>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+      </div>
+   
+    <footer>
+        <div class="footer-content">
+            <a href="index.html" class="buttonback" >INAPOI</a>
+        </div>
+    </footer>
+
+    <script type="text/javascript">//<![CDATA[
+        // create references to the modal...
+        var modal = document.getElementById('myModal');
+        // to all images -- note I'm using a class!
+        var images = document.getElementsByClassName('myImages');
+        // the image in the modal
+        var modalImg = document.getElementById("img01");
+        // and the caption in the modal
+        var captionText = document.getElementById("caption");
+        
+        // Go through all of the images with our custom class
+        for (var i = 0; i < images.length; i++) {
+          var img = images[i];
+          // and attach our click listener for this image.
+          img.onclick = function(evt) {
+            console.log(evt);
+            modal.style.display = "block";
+            modalImg.src = this.src;
+            captionText.innerHTML = this.alt;
+          }
+        }
+        var span = document.getElementsByClassName("close")[0];
+        var backgrnd = document.getElementsByClassName("modal")[0];
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        backgrnd.onclick = function() {
+          modal.style.display = "none";
+        }
+          //]]></script>
+        
+          <script>
+            // tell the embed parent frame the height of the content
+            if (window.parent && window.parent.parent){
+              window.parent.parent.postMessage(["resultsFrame", {
+                height: document.body.getBoundingClientRect().height,
+                slug: "f1zav0ge"
+              }], "*")
+            }
+        
+            // always overwrite window.name, in case users try to set it manually
+            window.name = "result"
+          </script>
+
+</body>
+
+</html>
+
