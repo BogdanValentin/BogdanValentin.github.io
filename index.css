@@ -214,7 +214,7 @@ footer {
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;
-  top: 30px;
-  left: 30px;
+  bottom: 30px;
+  right: 30px;
   z-index: 9999;
 }
