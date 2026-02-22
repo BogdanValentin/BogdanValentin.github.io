@@ -42,7 +42,7 @@ body {
 }
 .image-item img {
   width: 100%;
-  border-radius: 5px;
+  border-radius: 15px;
   height: 100%;
   object-fit: cover;
 }
@@ -114,6 +114,7 @@ footer {
   padding-top: 15px;
   color: #fff;
   padding-bottom: 20px;
+  margin-top: 20px;
 }
 
 .footer-content h2 {

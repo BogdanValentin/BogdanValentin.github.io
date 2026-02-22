@@ -119,7 +119,7 @@ footer {
 }
 
 #myImg {
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
   transition: 0.3s;
 }
