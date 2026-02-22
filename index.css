@@ -206,3 +206,15 @@ footer {
   }
   
 }
+
+#cat {
+  width: 60px;
+  height: 60px;
+  background-image: url(https://25.media.tumblr.com/11c0e3102a51c848f61976df8280827c/tumblr_mib819Yg8s1s5jjtzo1_500.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  z-index: 9999;
+}
