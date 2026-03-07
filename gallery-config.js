@@ -24,11 +24,11 @@
 //    }
 //
 //  The gallery grid adapts automatically:
-//    ≤ 6 images  → 2 × 3 grid
-//    ≤ 12 images → 3 × 4 grid
-//    ≤ 20 images → 4 × 5 grid
-//    ≤ 36 images → 5 × 8 grid
-//    > 36 images → 8 × 12 grid
+//    \u2264 6 images  \u2192 2 \u00d7 3 grid
+//    \u2264 12 images \u2192 3 \u00d7 4 grid
+//    \u2264 20 images \u2192 4 \u00d7 5 grid
+//    \u2264 36 images \u2192 5 \u00d7 8 grid
+//    > 36 images \u2192 8 \u00d7 12 grid
 //
 //  Categories with no images will use built-in placeholders.
 // ========================================================
@@ -70,7 +70,28 @@ const GALLERY_CATEGORIES = [
       'photos/animals/29.jpg',
       'photos/animals/30.jpg',
       'photos/animals/31.jpg',
-      'photos/animals/32.jpg'
+      'photos/animals/32.jpg',
+      'photos/animals/33.jpg',
+      'photos/animals/34.jpg',
+      'photos/animals/35.jpg',
+      'photos/animals/36.jpg',
+      'photos/animals/DSC_5682-Enhanced-NR.jpg',
+      'photos/animals/DSC_5706-Enhanced-NR.jpg',
+      'photos/animals/DSC_5709-Enhanced-NR.jpg',
+      'photos/animals/DSC_5710.jpg',
+      'photos/animals/DSC_5714-Enhanced-NR.jpg',
+      'photos/animals/DSC_5799.jpg',
+      'photos/animals/DSC_5812.jpg',
+      'photos/animals/DSC_5821.jpg',
+      'photos/animals/DSC_5822.jpg',
+      'photos/animals/DSC_5828.jpg',
+      'photos/animals/DSC_5843.jpg',
+      'photos/animals/DSC_7002.jpg',
+      'photos/animals/DSC_7287.jpg',
+      'photos/animals/DSC_7460.jpg',
+      'photos/animals/DSC_7537.jpg',
+      'photos/animals/DSC_7563.jpg',
+      'photos/animals/DSC_7615.jpg'
     ],
     imageData: [
       { number: '01', title: 'Animal 1', description: '' },
@@ -104,7 +125,28 @@ const GALLERY_CATEGORIES = [
       { number: '29', title: 'Animal 29', description: '' },
       { number: '30', title: 'Animal 30', description: '' },
       { number: '31', title: 'Animal 31', description: '' },
-      { number: '32', title: 'Animal 32', description: '' }
+      { number: '32', title: 'Animal 32', description: '' },
+      { number: '33', title: 'Animal 33', description: '' },
+      { number: '34', title: 'Animal 34', description: '' },
+      { number: '35', title: 'Animal 35', description: '' },
+      { number: '36', title: 'Animal 36', description: '' },
+      { number: '37', title: 'Animal 37', description: '' },
+      { number: '38', title: 'Animal 38', description: '' },
+      { number: '39', title: 'Animal 39', description: '' },
+      { number: '40', title: 'Animal 40', description: '' },
+      { number: '41', title: 'Animal 41', description: '' },
+      { number: '42', title: 'Animal 42', description: '' },
+      { number: '43', title: 'Animal 43', description: '' },
+      { number: '44', title: 'Animal 44', description: '' },
+      { number: '45', title: 'Animal 45', description: '' },
+      { number: '46', title: 'Animal 46', description: '' },
+      { number: '47', title: 'Animal 47', description: '' },
+      { number: '48', title: 'Animal 48', description: '' },
+      { number: '49', title: 'Animal 49', description: '' },
+      { number: '50', title: 'Animal 50', description: '' },
+      { number: '51', title: 'Animal 51', description: '' },
+      { number: '52', title: 'Animal 52', description: '' },
+      { number: '53', title: 'Animal 53', description: '' }
     ]
   },
   {
@@ -131,7 +173,23 @@ const GALLERY_CATEGORIES = [
       'photos/architecture/17.jpg',
       'photos/architecture/18.jpg',
       'photos/architecture/19.jpg',
-      'photos/architecture/20.jpg'
+      'photos/architecture/20.jpg',
+      'photos/architecture/21.jpg',
+      'photos/architecture/22.jpg',
+      'photos/architecture/23.jpg',
+      'photos/architecture/DSC_5773.jpg',
+      'photos/architecture/DSC_5775-Enhanced-NR.jpg',
+      'photos/architecture/DSC_6992.jpg',
+      'photos/architecture/DSC_7015.jpg',
+      'photos/architecture/DSC_7082.jpg',
+      'photos/architecture/DSC_7095.jpg',
+      'photos/architecture/DSC_7102.jpg',
+      'photos/architecture/DSC_7120.jpg',
+      'photos/architecture/DSC_7434.jpg',
+      'photos/architecture/DSC_7439.jpg',
+      'photos/architecture/DSC_7445.jpg',
+      'photos/architecture/DSC_7467.jpg',
+      'photos/architecture/DSC_7619.jpg'
     ],
     imageData: [
       { number: '01', title: 'Architecture 1', description: '' },
@@ -153,7 +211,23 @@ const GALLERY_CATEGORIES = [
       { number: '17', title: 'Architecture 17', description: '' },
       { number: '18', title: 'Architecture 18', description: '' },
       { number: '19', title: 'Architecture 19', description: '' },
-      { number: '20', title: 'Architecture 20', description: '' }
+      { number: '20', title: 'Architecture 20', description: '' },
+      { number: '21', title: 'Architecture 21', description: '' },
+      { number: '22', title: 'Architecture 22', description: '' },
+      { number: '23', title: 'Architecture 23', description: '' },
+      { number: '24', title: 'Architecture 24', description: '' },
+      { number: '25', title: 'Architecture 25', description: '' },
+      { number: '26', title: 'Architecture 26', description: '' },
+      { number: '27', title: 'Architecture 27', description: '' },
+      { number: '28', title: 'Architecture 28', description: '' },
+      { number: '29', title: 'Architecture 29', description: '' },
+      { number: '30', title: 'Architecture 30', description: '' },
+      { number: '31', title: 'Architecture 31', description: '' },
+      { number: '32', title: 'Architecture 32', description: '' },
+      { number: '33', title: 'Architecture 33', description: '' },
+      { number: '34', title: 'Architecture 34', description: '' },
+      { number: '35', title: 'Architecture 35', description: '' },
+      { number: '36', title: 'Architecture 36', description: '' }
     ]
   },
   {
@@ -172,7 +246,18 @@ const GALLERY_CATEGORIES = [
       'photos/portraits/9.jpg',
       'photos/portraits/10.jpg',
       'photos/portraits/11.jpg',
-      'photos/portraits/12.jpg'
+      'photos/portraits/12.jpg',
+      'photos/portraits/DSC04807.jpg',
+      'photos/portraits/DSC05096-Enhanced-NR.jpg',
+      'photos/portraits/DSC05144-Enhanced-NR.jpg',
+      'photos/portraits/DSC05172-Enhanced-NR.jpg',
+      'photos/portraits/DSC05391-Enhanced-NR.jpg',
+      'photos/portraits/DSC05846-Enhanced-NR.jpg',
+      'photos/portraits/DSC06398-Enhanced-NR.jpg',
+      'photos/portraits/DSC06738.jpg',
+      'photos/portraits/DSC_5905.jpg',
+      'photos/portraits/DSC_5936.jpg',
+      'photos/portraits/DSC_5960.jpg'
     ],
     imageData: [
       { number: '01', title: 'Portrait 1', description: '' },
@@ -186,7 +271,18 @@ const GALLERY_CATEGORIES = [
       { number: '09', title: 'Portrait 9', description: '' },
       { number: '10', title: 'Portrait 10', description: '' },
       { number: '11', title: 'Portrait 11', description: '' },
-      { number: '12', title: 'Portrait 12', description: '' }
+      { number: '12', title: 'Portrait 12', description: '' },
+      { number: '13', title: 'Portrait 13', description: '' },
+      { number: '14', title: 'Portrait 14', description: '' },
+      { number: '15', title: 'Portrait 15', description: '' },
+      { number: '16', title: 'Portrait 16', description: '' },
+      { number: '17', title: 'Portrait 17', description: '' },
+      { number: '18', title: 'Portrait 18', description: '' },
+      { number: '19', title: 'Portrait 19', description: '' },
+      { number: '20', title: 'Portrait 20', description: '' },
+      { number: '21', title: 'Portrait 21', description: '' },
+      { number: '22', title: 'Portrait 22', description: '' },
+      { number: '23', title: 'Portrait 23', description: '' }
     ]
   },
   {
@@ -213,7 +309,10 @@ const GALLERY_CATEGORIES = [
       'photos/sport/17.jpg',
       'photos/sport/18.jpg',
       'photos/sport/19.jpg',
-      'photos/sport/20.jpg'
+      'photos/sport/20.jpg',
+      'photos/sport/DSC07066.jpg',
+      'photos/sport/DSC07123.jpg',
+      'photos/sport/DSC07234.jpg'
     ],
     imageData: [
       { number: '01', title: 'Sport 1', description: '' },
@@ -235,7 +334,10 @@ const GALLERY_CATEGORIES = [
       { number: '17', title: 'Sport 17', description: '' },
       { number: '18', title: 'Sport 18', description: '' },
       { number: '19', title: 'Sport 19', description: '' },
-      { number: '20', title: 'Sport 20', description: '' }
+      { number: '20', title: 'Sport 20', description: '' },
+      { number: '21', title: 'Sport 21', description: '' },
+      { number: '22', title: 'Sport 22', description: '' },
+      { number: '23', title: 'Sport 23', description: '' }
     ]
   },
   {
@@ -247,14 +349,26 @@ const GALLERY_CATEGORIES = [
       'photos/landscapes/2.jpg',
       'photos/landscapes/3.jpg',
       'photos/landscapes/4.jpg',
-      'photos/landscapes/5.jpg',
       'photos/landscapes/6.jpg',
       'photos/landscapes/7.jpg',
       'photos/landscapes/8.jpg',
       'photos/landscapes/9.jpg',
       'photos/landscapes/10.jpg',
       'photos/landscapes/11.jpg',
-      'photos/landscapes/12.jpg'
+      'photos/landscapes/12.jpg',
+      'photos/landscapes/DSC04723.jpg',
+      'photos/landscapes/DSC04859.jpg',
+      'photos/landscapes/DSC04877.jpg',
+      'photos/landscapes/DSC04905.jpg',
+      'photos/landscapes/DSC_2929.JPG',
+      'photos/landscapes/DSC_6795.jpg',
+      'photos/landscapes/DSC_6973.jpg',
+      'photos/landscapes/DSC_7087.jpg',
+      'photos/landscapes/DSC_7302.jpg',
+      'photos/landscapes/DSC_7425.jpg',
+      'photos/landscapes/DSC_7471.jpg',
+      'photos/landscapes/DSC_7579.jpg',
+      'photos/landscapes/DSC_7797.jpg'
     ],
     imageData: [
       { number: '01', title: 'Landscape 1', description: '' },
@@ -268,7 +382,19 @@ const GALLERY_CATEGORIES = [
       { number: '09', title: 'Landscape 9', description: '' },
       { number: '10', title: 'Landscape 10', description: '' },
       { number: '11', title: 'Landscape 11', description: '' },
-      { number: '12', title: 'Landscape 12', description: '' }
+      { number: '12', title: 'Landscape 12', description: '' },
+      { number: '13', title: 'Landscape 13', description: '' },
+      { number: '14', title: 'Landscape 14', description: '' },
+      { number: '15', title: 'Landscape 15', description: '' },
+      { number: '16', title: 'Landscape 16', description: '' },
+      { number: '17', title: 'Landscape 17', description: '' },
+      { number: '18', title: 'Landscape 18', description: '' },
+      { number: '19', title: 'Landscape 19', description: '' },
+      { number: '20', title: 'Landscape 20', description: '' },
+      { number: '21', title: 'Landscape 21', description: '' },
+      { number: '22', title: 'Landscape 22', description: '' },
+      { number: '23', title: 'Landscape 23', description: '' },
+      { number: '24', title: 'Landscape 24', description: '' }
     ]
   },
   {
@@ -324,23 +450,115 @@ const GALLERY_CATEGORIES = [
   {
     id: 'events',
     label: 'Events',
-    cover: null,
-    images: [],
-    imageData: []
+    cover: 'photos/events/DSC04377.jpg',
+    images: [
+      'photos/events/DSC04377.jpg',
+      'photos/events/DSC04408.jpg',
+      'photos/events/DSC04437.jpg',
+      'photos/events/DSC04439.jpg',
+      'photos/events/DSC04453.jpg',
+      'photos/events/DSC04484.jpg',
+      'photos/events/DSC04651.jpg',
+      'photos/events/DSC07468-Enhanced-NR.jpg',
+      'photos/events/DSC_6830.jpg',
+      'photos/events/DSC_6844.jpg',
+      'photos/events/DSC_6871.jpg',
+      'photos/events/DSC_6879.jpg',
+      'photos/events/DSC_6887.jpg',
+      'photos/events/DSC_6888.jpg',
+      'photos/events/DSC_6894-Enhanced-NR.jpg',
+      'photos/events/DSC_6898-Enhanced-NR.jpg',
+      'photos/events/DSC_6957.jpg',
+      'photos/events/DSC_6965.jpg'
+    ],
+    imageData: [
+      { number: '01', title: 'Event 1', description: '' },
+      { number: '02', title: 'Event 2', description: '' },
+      { number: '03', title: 'Event 3', description: '' },
+      { number: '04', title: 'Event 4', description: '' },
+      { number: '05', title: 'Event 5', description: '' },
+      { number: '06', title: 'Event 6', description: '' },
+      { number: '07', title: 'Event 7', description: '' },
+      { number: '08', title: 'Event 8', description: '' },
+      { number: '09', title: 'Event 9', description: '' },
+      { number: '10', title: 'Event 10', description: '' },
+      { number: '11', title: 'Event 11', description: '' },
+      { number: '12', title: 'Event 12', description: '' },
+      { number: '13', title: 'Event 13', description: '' },
+      { number: '14', title: 'Event 14', description: '' },
+      { number: '15', title: 'Event 15', description: '' },
+      { number: '16', title: 'Event 16', description: '' },
+      { number: '17', title: 'Event 17', description: '' },
+      { number: '18', title: 'Event 18', description: '' }
+    ]
   },
   {
     id: 'art',
     label: 'Art',
-    cover: null,
-    images: [],
-    imageData: []
+    cover: 'photos/art/DSC_7492.jpg',
+    images: [
+      'photos/art/DSC_7492.jpg',
+      'photos/art/DSC_7493.jpg',
+      'photos/art/DSC_7500.jpg',
+      'photos/art/DSC_7504.jpg',
+      'photos/art/DSC_7505.jpg',
+      'photos/art/DSC_7507.jpg'
+    ],
+    imageData: [
+      { number: '01', title: 'Art 1', description: '' },
+      { number: '02', title: 'Art 2', description: '' },
+      { number: '03', title: 'Art 3', description: '' },
+      { number: '04', title: 'Art 4', description: '' },
+      { number: '05', title: 'Art 5', description: '' },
+      { number: '06', title: 'Art 6', description: '' }
+    ]
   },
   {
     id: 'autoportret',
     label: 'Autoportraits',
-    cover: null,
-    images: [],
-    imageData: []
+    cover: 'photos/autoportret/1.jpg',
+    images: [
+      'photos/autoportret/1.jpg',
+      'photos/autoportret/2.jpg',
+      'photos/autoportret/3.jpg',
+      'photos/autoportret/4.jpg',
+      'photos/autoportret/5.jpg',
+      'photos/autoportret/6.jpg',
+      'photos/autoportret/7.jpg',
+      'photos/autoportret/8.jpg',
+      'photos/autoportret/9.jpg',
+      'photos/autoportret/10.jpg',
+      'photos/autoportret/11.jpg',
+      'photos/autoportret/DSC04810.jpg',
+      'photos/autoportret/DSC04867.jpg',
+      'photos/autoportret/DSC_3074.jpg',
+      'photos/autoportret/DSC_3373.jpg',
+      'photos/autoportret/DSC_3448.jpg',
+      'photos/autoportret/DSC_5982.jpg',
+      'photos/autoportret/DSC_7293.jpg',
+      'photos/autoportret/DSC_7647.jpg'
+    ],
+    imageData: [
+      { number: '01', title: 'Autoportrait 1', description: '' },
+      { number: '02', title: 'Autoportrait 2', description: '' },
+      { number: '03', title: 'Autoportrait 3', description: '' },
+      { number: '04', title: 'Autoportrait 4', description: '' },
+      { number: '05', title: 'Autoportrait 5', description: '' },
+      { number: '06', title: 'Autoportrait 6', description: '' },
+      { number: '07', title: 'Autoportrait 7', description: '' },
+      { number: '08', title: 'Autoportrait 8', description: '' },
+      { number: '09', title: 'Autoportrait 9', description: '' },
+      { number: '10', title: 'Autoportrait 10', description: '' },
+      { number: '11', title: 'Autoportrait 11', description: '' },
+      { number: '12', title: 'Autoportrait 12', description: '' },
+      { number: '13', title: 'Autoportrait 13', description: '' },
+      { number: '14', title: 'Autoportrait 14', description: '' },
+      { number: '15', title: 'Autoportrait 15', description: '' },
+      { number: '16', title: 'Autoportrait 16', description: '' },
+      { number: '17', title: 'Autoportrait 17', description: '' },
+      { number: '18', title: 'Autoportrait 18', description: '' },
+      { number: '19', title: 'Autoportrait 19', description: '' }
+    ]
   },
   {
     id: 'vehicles',
@@ -351,22 +569,20 @@ const GALLERY_CATEGORIES = [
       'photos/vehicles/2.jpg',
       'photos/vehicles/3.jpg',
       'photos/vehicles/4.jpg',
-      'photos/vehicles/5.jpg',
       'photos/vehicles/6.jpg',
       'photos/vehicles/7.jpg',
       'photos/vehicles/8.jpg',
       'photos/vehicles/9.jpg',
-      'photos/vehicles/10.jpg',
       'photos/vehicles/11.jpg',
       'photos/vehicles/12.jpg',
-      'photos/vehicles/13.jpg',
       'photos/vehicles/14.jpg',
       'photos/vehicles/15.jpg',
       'photos/vehicles/16.jpg',
       'photos/vehicles/17.jpg',
       'photos/vehicles/18.jpg',
       'photos/vehicles/19.jpg',
-      'photos/vehicles/20.jpg'
+      'photos/vehicles/20.jpg',
+      'photos/vehicles/volga.jpg'
     ],
     imageData: [
       { number: '01', title: 'Vehicle 1', description: '' },
@@ -386,9 +602,7 @@ const GALLERY_CATEGORIES = [
       { number: '15', title: 'Vehicle 15', description: '' },
       { number: '16', title: 'Vehicle 16', description: '' },
       { number: '17', title: 'Vehicle 17', description: '' },
-      { number: '18', title: 'Vehicle 18', description: '' },
-      { number: '19', title: 'Vehicle 19', description: '' },
-      { number: '20', title: 'Vehicle 20', description: '' }
+      { number: '18', title: 'Vehicle 18', description: '' }
     ]
   },
   {
