@@ -363,7 +363,7 @@ const GALLERY_CATEGORIES = [
       'photos/landscapes/DSC04859.jpg',
       'photos/landscapes/DSC04877.jpg',
       'photos/landscapes/DSC04905.jpg',
-      'photos/landscapes/DSC_2929.JPG',
+      'photos/landscapes/DSC_2929.jpg',
       'photos/landscapes/DSC_6795.jpg',
       'photos/landscapes/DSC_6973.jpg',
       'photos/landscapes/DSC_7087.jpg',
