@@ -42,6 +42,11 @@ body.zoom-mode {
   cursor: default;
 }
 
+body.zoom-mode .header > *,
+body.zoom-mode .footer > * {
+  pointer-events: none;
+}
+
 .preloader-overlay {
   background: #000;
 }
@@ -397,6 +402,8 @@ h3 {
   z-index: 2;
   opacity: 0;
   pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .split-screen-container.active {
@@ -408,19 +415,21 @@ h3 {
   position: relative;
   width: 65vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1;
   cursor: pointer;
+  padding-left: 4.5rem;
+  padding-right: 4.5rem;
 }
 
 .split-right {
   position: relative;
   width: 35vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -583,17 +592,24 @@ h3 {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  z-index: 6;
+  z-index: 9999;
   opacity: 0;
+  pointer-events: none;
   transition: left 1.2s cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 .controls-container.visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .controls-container.split-mode {
   left: 82.5%;
+}
+
+.controls-container.split-mode .percentage-indicator,
+.controls-container.split-mode #controls {
+  display: none;
 }
 
 .percentage-indicator {
@@ -747,31 +763,29 @@ h3 {
   z-index: 3;
   pointer-events: none;
   will-change: transform, left, top, width, height, opacity;
-  overflow: hidden;
-  border-radius: 12px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scaling-image-overlay img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   display: block;
+  border-radius: 12px;
+  border: 2px solid rgba(166, 75, 35, 0.7);
+  box-shadow: 0 0 12px rgba(166, 75, 35, 0.4), 0 0 48px rgba(166, 75, 35, 0.2), 0 0 80px rgba(166, 75, 35, 0.1), inset 0 0 12px rgba(166, 75, 35, 0.08);
 }
 
 /* ===== IMAGE NAVIGATION BUTTONS ===== */
-.image-nav-row {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
 .image-nav-btn {
-  position: relative;
-  top: auto;
-  left: auto;
-  right: auto;
-  transform: none;
-  z-index: 5;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
   width: 48px;
   height: 48px;
   background: rgba(255, 255, 255, 0.06);
@@ -788,6 +802,14 @@ h3 {
   -webkit-backdrop-filter: blur(8px);
 }
 
+.image-nav-prev {
+  left: 0.75rem;
+}
+
+.image-nav-next {
+  left: calc(65vw - 0.75rem - 48px);
+}
+
 .image-nav-btn.active {
   pointer-events: all;
 }
@@ -798,7 +820,7 @@ h3 {
 }
 
 .image-nav-btn:active {
-  transform: scale(0.92);
+  transform: translateY(-50%) scale(0.92);
 }
 
 .image-nav-btn svg {
@@ -1542,7 +1564,10 @@ h3 {
   }
 
   .scaling-image-overlay img {
-    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
   }
 
   /* Image title overlay: inherits position from split-right on mobile */
@@ -1641,6 +1666,22 @@ h3 {
   .image-nav-btn {
     width: 40px;
     height: 40px;
+    top: auto;
+    bottom: 5rem;
+    transform: none;
+  }
+
+  .image-nav-prev {
+    left: 1rem;
+  }
+
+  .image-nav-next {
+    left: auto;
+    right: 1rem;
+  }
+
+  .image-nav-btn:active {
+    transform: scale(0.92);
   }
 
   .image-nav-btn svg {

@@ -908,6 +908,7 @@ class FashionGallery {
     if (this.zoomState.isActive) return;
     this.zoomState.isActive = true;
     this.zoomState.selectedItem = selectedItemData;
+    this._splitInfoHidden = false;
     this.soundSystem.play("open");
     // Disable dragging
     if (this.draggable) this.draggable.disable();
@@ -1149,6 +1150,9 @@ class FashionGallery {
         splitContainer.classList.remove("active");
         document.body.classList.remove("zoom-mode");
         if (this.draggable) this.draggable.enable();
+        // Reset split-mode states
+        const splitRight = document.getElementById('splitRight');
+        if (splitRight) gsap.set(splitRight, { opacity: 1 });
         this.zoomState.isActive = false;
         this.zoomState.selectedItem = null;
         this.zoomState.flipAnimation = null;
@@ -1188,7 +1192,7 @@ class FashionGallery {
     gsap.to(overlay, {
       x: slideDir * 80,
       opacity: 0,
-      duration: 0.35,
+      duration: 0.2,
       ease: 'power2.in',
       onComplete: () => {
         // Swap source
@@ -1201,12 +1205,13 @@ class FashionGallery {
         // Update title overlay
         this.updateTitleOverlay(newItemData.index);
 
+        // Allow next navigation as soon as the new image starts appearing
+        this._isNavigating = false;
+
         // Animate in from opposite side
         gsap.fromTo(overlay,
           { x: -slideDir * 80, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.4, ease: 'power2.out',
-            onComplete: () => { this._isNavigating = false; }
-          }
+          { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
         );
 
         // Animate title text
@@ -1227,6 +1232,8 @@ class FashionGallery {
       }
     });
   }
+
+
   // --- Category Index ---
   buildCategoryIndex() {
     const list = document.getElementById('categoryList');
@@ -2149,6 +2156,8 @@ initDraggable() {
     window.addEventListener("resize", () => {
       // Re-detect mobile on resize/orientation change
       this.isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024);
+      // Skip reset when in zoom mode (e.g. fullscreen toggle triggers resize)
+      if (this.zoomState.isActive) return;
       setTimeout(() => {
         this.resetPosition();
         this.initDraggable();
