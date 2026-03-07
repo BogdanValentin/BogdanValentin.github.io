@@ -1494,7 +1494,10 @@ class FashionGallery {
     else if (n <= 12) { this.config.rows = 3; this.config.cols = 4; }
     else if (n <= 20) { this.config.rows = 4; this.config.cols = 5; }
     else if (n <= 36) { this.config.rows = 5; this.config.cols = 8; }
-    else              { this.config.rows = 8; this.config.cols = 12; }
+    else if (n <= 96) { this.config.rows = 8; this.config.cols = 12; }
+    else if (n <= 180){ this.config.rows = 12; this.config.cols = 15; }
+    else if (n <= 300){ this.config.rows = 15; this.config.cols = 20; }
+    else              { this.config.rows = 20; this.config.cols = 25; }
 
     // Update header label
     const label = document.getElementById('activeCategoryLabel');
@@ -2082,6 +2085,18 @@ initDraggable() {
   }
   init() {
     this.buildCategoryIndex();
+
+    // Adapt grid proportions to initial image count
+    const n = this.fashionImages.length;
+    if (n <= 6)       { this.config.rows = 2; this.config.cols = 3; }
+    else if (n <= 12) { this.config.rows = 3; this.config.cols = 4; }
+    else if (n <= 20) { this.config.rows = 4; this.config.cols = 5; }
+    else if (n <= 36) { this.config.rows = 5; this.config.cols = 8; }
+    else if (n <= 96) { this.config.rows = 8; this.config.cols = 12; }
+    else if (n <= 180){ this.config.rows = 12; this.config.cols = 15; }
+    else if (n <= 300){ this.config.rows = 15; this.config.cols = 20; }
+    else              { this.config.rows = 20; this.config.cols = 25; }
+
     this.config.currentGap = this.calculateGapForZoom(this.config.currentZoom);
     this.generateGridItems();
 

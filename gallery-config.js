@@ -27,8 +27,11 @@
 //    \u2264 6 images  \u2192 2 \u00d7 3 grid
 //    \u2264 12 images \u2192 3 \u00d7 4 grid
 //    \u2264 20 images \u2192 4 \u00d7 5 grid
-//    \u2264 36 images \u2192 5 \u00d7 8 grid
-//    > 36 images \u2192 8 \u00d7 12 grid
+//    ≤ 36 images  → 5 × 8 grid
+//    ≤ 96 images  → 8 × 12 grid
+//    ≤ 180 images → 12 × 15 grid
+//    ≤ 300 images → 15 × 20 grid
+//    > 300 images → 20 × 25 grid
 //
 //  Categories with no images will use built-in placeholders.
 // ========================================================
