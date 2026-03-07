@@ -1042,9 +1042,11 @@ class FashionGallery {
       splitLeft.removeEventListener("click", this._boundHandleSplitAreaClick);
     if (splitRight)
       splitRight.removeEventListener("click", this._boundHandleSplitAreaClick);
-    // Kill any pending/delayed tweens on the close button to prevent
-    // the enterZoomMode animation (0.9s delayed) from re-showing it
+    // Kill any pending/delayed tweens on the close button and nav buttons
+    // to prevent the enterZoomMode animations (delayed) from re-showing them
     gsap.killTweensOf(this.closeButton);
+    gsap.killTweensOf(this.navPrev);
+    gsap.killTweensOf(this.navNext);
     const splitContainer = this.splitScreenContainer;
     const selectedElement = this.zoomState.selectedItem.element;
     const selectedImg = this.zoomState.selectedItem.img;
