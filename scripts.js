@@ -792,6 +792,8 @@ class FashionGallery {
         const img = document.createElement("img");
         img.src = this.toThumbPath(imageUrl);
         img.alt = `Fashion Portrait ${imageIndex}`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
         item.appendChild(img);
         const itemData = {
           element: item,
@@ -828,27 +830,18 @@ class FashionGallery {
           ) {
             return;
           }
+          // Use CSS transitions instead of per-item GSAP tweens for performance
           if (entry.isIntersecting) {
             entry.target.classList.remove("out-of-view");
-            gsap.to(entry.target, {
-              opacity: 1,
-              duration: 0.6,
-              ease: "power2.out"
-            });
           } else {
             entry.target.classList.add("out-of-view");
-            gsap.to(entry.target, {
-              opacity: 0.1,
-              duration: 0.6,
-              ease: "power2.out"
-            });
           }
         });
       },
       {
         root: null,
-        threshold: 0.15,
-        rootMargin: "10%"
+        threshold: 0.05,
+        rootMargin: "20%"
       }
     );
     // Observe all grid items
@@ -1581,10 +1574,12 @@ class FashionGallery {
         duration: 0.45,
         ease: "power2.out",
         onUpdate: () => {
-          // Keep lastValidPosition in sync with the animating values
-          const m = new DOMMatrix(getComputedStyle(this.canvasWrapper).transform);
-          this.lastValidPosition.x = m.m41;
-          this.lastValidPosition.y = m.m42;
+          // Use GSAP's own tracked values instead of getComputedStyle (avoids forced reflow)
+          const tween = this._scrollZoomTween;
+          if (tween) {
+            this.lastValidPosition.x = gsap.getProperty(this.canvasWrapper, 'x');
+            this.lastValidPosition.y = gsap.getProperty(this.canvasWrapper, 'y');
+          }
         },
         onComplete: () => {
           this.lastValidPosition.x = newX;
@@ -1606,33 +1601,42 @@ class FashionGallery {
     const newGap = this.calculateGapForZoom(zoomLevel);
 
     if (newGap !== this.config.currentGap) {
-      // Animate grid items to new gap positions
+      // Batch all position updates into a single GSAP timeline for better perf
+      const tl = gsap.timeline({ defaults: { duration: 0.8, ease: this.customEase } });
+
+      // Prepare position arrays for batch animation
+      const elements = [];
+      const xValues = [];
+      const yValues = [];
       this.gridItems.forEach((itemData) => {
         const newX = itemData.col * (this.config.itemWidth + newGap);
         const newY = itemData.row * (this.config.itemHeight + newGap);
         itemData.baseX = newX;
         itemData.baseY = newY;
-        gsap.to(itemData.element, {
-          duration: 0.8,
-          left: newX,
-          top: newY,
-          ease: this.customEase
-        });
+        elements.push(itemData.element);
+        xValues.push(newX);
+        yValues.push(newY);
       });
+
+      // Single batched tween for all grid items
+      tl.to(elements, {
+        left: (i) => xValues[i],
+        top: (i) => yValues[i],
+        duration: 0.8,
+        ease: this.customEase
+      }, 0);
 
       const newWidth = this.config.cols * (this.config.itemWidth + newGap) - newGap;
       const newHeight = this.config.rows * (this.config.itemHeight + newGap) - newGap;
-      gsap.to(this.canvasWrapper, {
-        duration: 0.8,
+      tl.to(this.canvasWrapper, {
         width: newWidth,
         height: newHeight,
-        ease: this.customEase,
         onComplete: () => {
           this.config.currentGap = newGap;
           this.calculateGridDimensions(newGap);
           this.initDraggable();
         }
-      });
+      }, 0);
     } else {
       this.calculateGridDimensions(newGap);
       this.initDraggable();
