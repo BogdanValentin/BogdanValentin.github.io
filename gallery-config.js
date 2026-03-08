@@ -608,11 +608,4 @@ const GALLERY_CATEGORIES = [
       { number: '18', title: 'Vehicle 18', description: '' }
     ]
   },
-  {
-    id: 'bw',
-    label: 'Black & White',
-    cover: null,
-    images: [],
-    imageData: []
-  }
 ];

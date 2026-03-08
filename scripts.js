@@ -167,16 +167,17 @@ class FashionGallery {
     this.centerEase = CustomEase.create("center", ".25,.46,.45,.94");
     // Detect mobile
     this.isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024);
-    // Configuration — smaller tiles on mobile, same grid count
+    // Configuration — grid adapts to aspect ratio
     this.config = {
       itemWidth: this.isMobile ? 260 : 400,
       itemHeight: this.isMobile ? 195 : 300,
       baseGap: this.isMobile ? 10 : 16,
-      rows: 8,
-      cols: 12,
+      rows: 8, // will be set below
+      cols: 12, // will be set below
       currentZoom: this.isMobile ? 0.5 : 0.6,
       currentGap: this.isMobile ? 20 : 32
     };
+    this.setGridShape();
     // State
     this.zoomState = {
       isActive: false,
@@ -203,6 +204,26 @@ class FashionGallery {
     this.initSoundSystem();
     // Initialize image data
     this.initImageData();
+  }
+
+  setGridShape() {
+    // Calculate grid shape based on aspect ratio and image count
+    const n = this.fashionImages ? this.fashionImages.length : 24;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const portrait = h > w;
+    let rows, cols;
+    if (portrait) {
+      // Portrait: more rows, fewer columns
+      cols = Math.max(2, Math.round(Math.sqrt(n * w / h)));
+      rows = Math.ceil(n / cols);
+    } else {
+      // Landscape: more columns, fewer rows
+      rows = Math.max(2, Math.round(Math.sqrt(n * h / w)));
+      cols = Math.ceil(n / rows);
+    }
+    this.config.rows = rows;
+    this.config.cols = cols;
   }
   initSoundSystem() {
     this.soundSystem = {
@@ -2090,28 +2111,12 @@ initDraggable() {
   init() {
     this.buildCategoryIndex();
 
-    // Adapt grid proportions to initial image count
-    const n = this.fashionImages.length;
-    if (n <= 6)       { this.config.rows = 2; this.config.cols = 3; }
-    else if (n <= 12) { this.config.rows = 3; this.config.cols = 4; }
-    else if (n <= 20) { this.config.rows = 4; this.config.cols = 5; }
-    else if (n <= 36) { this.config.rows = 5; this.config.cols = 8; }
-    else if (n <= 96) { this.config.rows = 8; this.config.cols = 12; }
-    else if (n <= 180){ this.config.rows = 12; this.config.cols = 15; }
-    else if (n <= 300){ this.config.rows = 15; this.config.cols = 20; }
-    else              { this.config.rows = 20; this.config.cols = 25; }
-
+    // Set grid shape based on aspect ratio and image count
+    this.setGridShape();
     this.config.currentGap = this.calculateGapForZoom(this.config.currentZoom);
     this.generateGridItems();
 
-    // Prevent default touch gestures (pinch-zoom, pull-to-refresh) on the viewport
-    if (this.isMobile) {
-      this.viewport.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 1) e.preventDefault();
-      }, { passive: false });
-      document.addEventListener('gesturestart', (e) => e.preventDefault());
-      document.addEventListener('gesturechange', (e) => e.preventDefault());
-    }
+    // Allow pinch-zoom and gestures on mobile (no preventDefault)
 
     // Set initial opacity for viewport to hide the flash
     gsap.set(this.viewport, { opacity: 0 });
@@ -2180,6 +2185,7 @@ initDraggable() {
       // Skip reset when in zoom mode (e.g. fullscreen toggle triggers resize)
       if (this.zoomState.isActive) return;
       setTimeout(() => {
+        this.setGridShape();
         this.resetPosition();
         this.initDraggable();
       }, 100);
