@@ -1213,24 +1213,36 @@ class FashionGallery {
       duration: 0.2,
       ease: 'power2.in',
       onComplete: () => {
-        // Swap source
+        // Preload full-size image first, then swap to avoid flashing
         const img = overlay.querySelector('img');
-        img.src = this.toFullPath(newItemData.imageUrl);
-
-        // Update stored reference
-        this.zoomState.selectedItem = newItemData;
-
-        // Update title overlay
-        this.updateTitleOverlay(newItemData.index);
-
-        // Allow next navigation as soon as the new image starts appearing
-        this._isNavigating = false;
-
-        // Animate in from opposite side
-        gsap.fromTo(overlay,
-          { x: -slideDir * 80, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
-        );
+        const newSrc = this.toFullPath(newItemData.imageUrl);
+        const pre = new Image();
+        pre.onload = () => {
+          img.src = newSrc;
+          // Update stored reference
+          this.zoomState.selectedItem = newItemData;
+          // Update title overlay
+          this.updateTitleOverlay(newItemData.index);
+          // Allow next navigation as soon as the new image appears
+          this._isNavigating = false;
+          // Animate in from opposite side
+          gsap.fromTo(overlay,
+            { x: -slideDir * 80, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
+          );
+        };
+        pre.onerror = () => {
+          // On error, still swap and animate to avoid deadlock
+          img.src = newSrc;
+          this.zoomState.selectedItem = newItemData;
+          this.updateTitleOverlay(newItemData.index);
+          this._isNavigating = false;
+          gsap.fromTo(overlay,
+            { x: -slideDir * 80, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
+          );
+        };
+        pre.src = newSrc;
 
         // Animate title text
         gsap.fromTo('#imageSlideNumber span',
