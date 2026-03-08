@@ -1446,9 +1446,15 @@ h3 {
   background-color: rgba(166, 75, 35, 1);
 }
 
-.panel-scroll:hover .panel-rect:not(:first-child) {
-  opacity: 1;
-  transform: translateY(0);
+.panel-scroll .panel-rect:not(:first-child) {
+  /* keep hidden by default; hover reveal is enabled only on hover-capable devices below */
+}
+
+@media (hover: hover) {
+  .panel-scroll:hover .panel-rect:not(:first-child) {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panel-rect:nth-child(1) { width: 100px; height: 15px; }
@@ -1468,6 +1474,18 @@ h3 {
 .panel-scroll:not(:hover) .panel-rect:nth-child(6) { transition-delay: 0.15s; }
 .panel-scroll:not(:hover) .panel-rect:nth-child(7) { transition-delay: 0.05s; }
 .panel-scroll:not(:hover) .panel-rect:nth-child(8) { transition-delay: 0s; }
+
+@media (max-width: 768px) {
+  /* Progressive lines as you scroll down */
+  .panel-scroll[data-lines] .panel-rect {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .panel-scroll[data-lines] .panel-rect.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {

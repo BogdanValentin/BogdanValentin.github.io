@@ -150,6 +150,8 @@ class PreloaderManager {
 }
 
 class FashionGallery {
+
+
   constructor() {
     // DOM elements
     this.viewport = document.getElementById("viewport");
