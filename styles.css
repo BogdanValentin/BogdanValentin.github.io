@@ -933,7 +933,7 @@ h3 {
 .category-index-inner {
   flex: 1;
   display: flex;
-  padding: 5rem 4rem 2rem;
+  padding: 0 4rem; /* remove top/bottom bars */
   gap: 2rem;
   overflow: hidden;
   position: relative;
@@ -946,6 +946,35 @@ h3 {
   justify-content: center;
   gap: 0;
   max-width: 60%;
+}
+
+/* Make the category list scrollable when needed, but stay vertically centered when it fits */
+.category-list {
+  /* align from the top so first items remain visible on short viewports */
+  justify-content: flex-start;
+  overflow-y: auto;
+  max-height: 100%;
+  margin: 0;
+  padding: 2rem 0 2rem 0; /* top/bottom spacing so buttons don't touch edges */
+  padding-right: 1.6rem; /* more room between counts and scrollbar */
+  scrollbar-width: auto;
+  scrollbar-color: rgba(166,75,35,0.9) transparent;
+}
+
+.category-list::-webkit-scrollbar {
+  width: 12px;
+}
+.category-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.category-list::-webkit-scrollbar-thumb {
+  background: rgba(166,75,35,0.6);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.category-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(166,75,35,0.85);
 }
 
 .category-row {
@@ -1029,11 +1058,12 @@ h3 {
 
 .category-count {
   font-family: "TheGoodMonolith", monospace;
-  font-size: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.15);
   letter-spacing: 0.08em;
   flex-shrink: 0;
-  min-width: 4rem;
+  min-width: 4.2rem;
   text-align: right;
   transition: color 0.3s ease;
 }
@@ -1729,7 +1759,7 @@ h3 {
 
   /* Category Index — mobile */
   .category-index-inner {
-    padding: 4rem 1.5rem 1rem;
+    padding: 0 1.5rem; /* remove top/bottom bars on mobile too */
     flex-direction: column;
   }
 
@@ -1737,7 +1767,7 @@ h3 {
     max-width: 100%;
     overflow-y: auto;
     justify-content: flex-start;
-    padding-top: 1rem;
+    padding: 1rem 0; /* ensure top/bottom spacing on mobile */
   }
 
   .category-preview {
