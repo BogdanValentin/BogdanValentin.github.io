@@ -1542,9 +1542,12 @@ class FashionGallery {
       opacity: 0, scale: 0.85, duration: 0.3,
       stagger: { amount: 0.15, from: 'random' },
       onComplete: () => {
-        this.config.currentGap = this.calculateGapForZoom(this.config.currentZoom);
+        // Auto-fit zoom for the new grid dimensions
+        const fitZoom = this.calculateFitZoom();
+        this.config.currentZoom = fitZoom;
+        this.config.currentGap = this.calculateGapForZoom(fitZoom);
         this.generateGridItems();
-        gsap.set(this.canvasWrapper, { scale: this.config.currentZoom });
+        gsap.set(this.canvasWrapper, { scale: fitZoom });
         this.calculateGridDimensions(this.config.currentGap);
         const vw = window.innerWidth;
         const vh = window.innerHeight;
@@ -1556,6 +1559,9 @@ class FashionGallery {
         this.lastValidPosition.y = cy;
         this.playIntroAnimation();
         this.initDraggable();
+        // Update zoom UI to reflect the new fit zoom
+        this.updatePercentageIndicator(fitZoom);
+        this.updateZoomButtonHighlight(fitZoom);
       }
     });
   }
