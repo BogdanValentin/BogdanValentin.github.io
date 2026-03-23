@@ -2285,9 +2285,24 @@ document.addEventListener("DOMContentLoaded", () => {
   gallery.init();
   initMobileMenu();
 
-  // Preload every gallery image in parallel
+  // Preload only the thumbnails that are actually visible on screen
+  // after the initial centered layout, instead of all full-res images
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const zoom = gallery.config.currentZoom;
+  const ox = gallery.lastValidPosition.x;
+  const oy = gallery.lastValidPosition.y;
+  const preloadSrcs = gallery.gridItems
+    .filter((item) => {
+      const sx = ox + item.baseX * zoom;
+      const sy = oy + item.baseY * zoom;
+      const sw = gallery.config.itemWidth * zoom;
+      const sh = gallery.config.itemHeight * zoom;
+      return sx + sw > 0 && sx < vw && sy + sh > 0 && sy < vh;
+    })
+    .map((item) => gallery.toThumbPath(item.imageUrl));
   const preloadPromise = Promise.all(
-    gallery.fashionImages.map(
+    preloadSrcs.map(
       (src) =>
         new Promise((resolve) => {
           const img = new Image();
@@ -2301,7 +2316,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Minimum animation time so the preloader doesn't flash away
   const minTimePromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // Reveal only when both the images AND the minimum time are done
+  // Reveal only when both the first thumbnails AND the minimum time are done
   Promise.all([preloadPromise, minTimePromise]).then(() => {
     preloader.complete();
   });
