@@ -158,7 +158,6 @@ class FashionGallery {
     this.canvasWrapper = document.getElementById("canvasWrapper");
     this.gridContainer = document.getElementById("gridContainer");
     this.splitScreenContainer = document.getElementById("splitScreenContainer");
-    this.imageTitleOverlay = document.getElementById("imageTitleOverlay");
     this.closeButton = document.getElementById("closeButton");
     this.navPrev = document.getElementById("navPrev");
     this.navNext = document.getElementById("navNext");
@@ -713,52 +712,6 @@ class FashionGallery {
       this.imageData = this.placeholderImageData;
     }
   }
-  // Custom line splitting function (since we can't use SplitText)
-  splitTextIntoLines(element, text) {
-    element.innerHTML = "";
-    // Split by sentences and create lines
-    const sentences = text.split(/(?<=[.!?])\s+/);
-    const lines = [];
-    // Create temporary div to measure text width
-    const temp = document.createElement("div");
-    const fontSize = this.isMobile ? '13px' : '16px';
-    temp.style.cssText = `
-          position: absolute;
-          visibility: hidden;
-          width: ${element.offsetWidth}px;
-          font-family: 'PPNeueMontreal', sans-serif;
-          font-size: ${fontSize};
-          font-weight: 300;
-          line-height: 1.4;
-        `;
-    document.body.appendChild(temp);
-    let currentLine = "";
-    sentences.forEach((sentence) => {
-      const words = sentence.split(" ");
-      words.forEach((word) => {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        temp.textContent = testLine;
-        if (temp.offsetWidth > element.offsetWidth && currentLine) {
-          lines.push(currentLine);
-          currentLine = word;
-        } else {
-          currentLine = testLine;
-        }
-      });
-    });
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-    document.body.removeChild(temp);
-    // Create line elements
-    lines.forEach((lineText) => {
-      const lineSpan = document.createElement("span");
-      lineSpan.className = "description-line";
-      lineSpan.textContent = lineText;
-      element.appendChild(lineSpan);
-    });
-    return element.querySelectorAll(".description-line");
-  }
   calculateGapForZoom(zoomLevel) {
     if (this.isMobile) {
       if (zoomLevel >= 1.0) return 10;
@@ -886,27 +839,13 @@ class FashionGallery {
     return clean.replace(/\/([^/]+)$/, '/full/$1');
   }
 
-  updateTitleOverlay(imageIndex) {
-    const data = this.imageData[imageIndex % this.imageData.length];
-    const numberElement = document.querySelector("#imageSlideNumber span");
-    const titleElement = document.querySelector("#imageSlideTitle h1");
-    const descriptionElement = document.getElementById("imageSlideDescription");
-    if (numberElement && titleElement && descriptionElement) {
-      numberElement.textContent = data.number;
-      titleElement.textContent = data.title;
-      // Split description into lines
-      this.descriptionLines = this.splitTextIntoLines(
-        descriptionElement,
-        data.description
-      );
-    }
-  }
+  updateTitleOverlay() {}
   createScalingOverlay(sourceImg) {
     const overlay = document.createElement("div");
     overlay.className = "scaling-image-overlay";
     const img = document.createElement("img");
-    // Use full-size version for the zoom overlay
-    img.src = this.toFullPath(sourceImg.src);
+    // Show thumbnail immediately, then swap to full once loaded
+    img.src = sourceImg.src;
     img.alt = sourceImg.alt;
     overlay.appendChild(img);
     document.body.appendChild(overlay);
@@ -918,6 +857,11 @@ class FashionGallery {
       height: sourceRect.height,
       opacity: 1
     });
+    // Load full-size in background and swap when ready
+    const fullSrc = this.toFullPath(sourceImg.src);
+    const pre = new Image();
+    pre.onload = () => { img.src = fullSrc; };
+    pre.src = fullSrc;
     return overlay;
   }
   enterZoomMode(selectedItemData) {
@@ -956,53 +900,6 @@ class FashionGallery {
       duration: 1.2,
       ease: this.customEase,
       onComplete: () => {
-        this.updateTitleOverlay(selectedItemData.index);
-        const imageTitleOverlay = this.imageTitleOverlay;
-        // Reset positions for animation
-        gsap.set("#imageSlideNumber span", {
-          y: 20,
-          opacity: 0
-        });
-        gsap.set("#imageSlideTitle h1", {
-          y: 60,
-          opacity: 0
-        });
-        gsap.set(this.descriptionLines, {
-          y: 80,
-          opacity: 0
-        });
-        // Show overlay container immediately
-        imageTitleOverlay.classList.add("active");
-        gsap.to(imageTitleOverlay, {
-          opacity: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-        // Animate in number - much sooner
-        gsap.to("#imageSlideNumber span", {
-          duration: 0.8,
-          y: 0,
-          opacity: 1,
-          ease: this.customEase,
-          delay: 0.1
-        });
-        // Animate in title - sooner
-        gsap.to("#imageSlideTitle h1", {
-          duration: 0.8,
-          y: 0,
-          opacity: 1,
-          ease: this.customEase,
-          delay: 0.15
-        });
-        // Animate description lines one by one - much sooner
-        gsap.to(this.descriptionLines, {
-          duration: 0.8,
-          y: 0,
-          opacity: 1,
-          ease: this.customEase,
-          delay: 0.2,
-          stagger: 0.15
-        });
       }
     });
     this.controlsContainer.classList.add("split-mode");
@@ -1039,9 +936,10 @@ class FashionGallery {
     document.addEventListener("keydown", this._boundHandleZoomKeys);
   }
   handleSplitAreaClick(e) {
-    if (e.target === e.currentTarget) {
-      this.exitZoomMode();
-    }
+    // Close when tapping empty space around the image, but not on
+    // interactive elements (close button, nav buttons, title overlay)
+    if (e.target.closest(".close-button, .image-nav-btn")) return;
+    this.exitZoomMode();
   }
   exitZoomMode() {
     if (
@@ -1068,50 +966,6 @@ class FashionGallery {
     const selectedImg = this.zoomState.selectedItem.img;
     if (this.zoomState.flipAnimation) {
       this.zoomState.flipAnimation.kill();
-    }
-    // Hide title overlay quickly
-    const overlayElement = this.imageTitleOverlay;
-    gsap.to(overlayElement, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.out"
-    });
-    gsap.to("#imageSlideNumber span", {
-      duration: 0.4,
-      y: -20,
-      opacity: 0,
-      ease: "power2.out"
-    });
-    gsap.to("#imageSlideTitle h1", {
-      duration: 0.4,
-      y: -60,
-      opacity: 0,
-      ease: "power2.out"
-    });
-    if (this.descriptionLines) {
-      gsap.to(this.descriptionLines, {
-        duration: 0.4,
-        y: -80,
-        opacity: 0,
-        ease: "power2.out",
-        stagger: -0.05,
-        onComplete: () => {
-          overlayElement.classList.remove("active");
-          // Reset all text elements
-          gsap.set("#imageSlideNumber span", {
-            y: 20,
-            opacity: 0
-          });
-          gsap.set("#imageSlideTitle h1", {
-            y: 60,
-            opacity: 0
-          });
-          gsap.set(this.descriptionLines, {
-            y: 80,
-            opacity: 0
-          });
-        }
-      });
     }
     // Remove active class immediately so pointer-events are disabled
     this.closeButton.classList.remove("active");
@@ -1213,52 +1067,32 @@ class FashionGallery {
       duration: 0.2,
       ease: 'power2.in',
       onComplete: () => {
-        // Preload full-size image first, then swap to avoid flashing
+        // Show thumbnail immediately, then swap to full once loaded
         const img = overlay.querySelector('img');
-        const newSrc = this.toFullPath(newItemData.imageUrl);
+        const thumbSrc = this.toThumbPath(newItemData.imageUrl);
+        const fullSrc = this.toFullPath(newItemData.imageUrl);
+        img.src = thumbSrc;
+        // Update stored reference
+        this.zoomState.selectedItem = newItemData;
+        // Update title overlay
+        this.updateTitleOverlay(newItemData.index);
+        // Allow next navigation immediately
+        this._isNavigating = false;
+        // Animate in from opposite side
+        gsap.fromTo(overlay,
+          { x: -slideDir * 80, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
+        );
+        // Load full-size in background and swap when ready
+        // Cancel any previous preload so stale loads don't overwrite the current image
+        if (this._navPreload) { this._navPreload.onload = null; this._navPreload.src = ''; }
         const pre = new Image();
+        this._navPreload = pre;
         pre.onload = () => {
-          img.src = newSrc;
-          // Update stored reference
-          this.zoomState.selectedItem = newItemData;
-          // Update title overlay
-          this.updateTitleOverlay(newItemData.index);
-          // Allow next navigation as soon as the new image appears
-          this._isNavigating = false;
-          // Animate in from opposite side
-          gsap.fromTo(overlay,
-            { x: -slideDir * 80, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
-          );
+          if (this._navPreload === pre) { img.src = fullSrc; }
         };
-        pre.onerror = () => {
-          // On error, still swap and animate to avoid deadlock
-          img.src = newSrc;
-          this.zoomState.selectedItem = newItemData;
-          this.updateTitleOverlay(newItemData.index);
-          this._isNavigating = false;
-          gsap.fromTo(overlay,
-            { x: -slideDir * 80, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
-          );
-        };
-        pre.src = newSrc;
+        pre.src = fullSrc;
 
-        // Animate title text
-        gsap.fromTo('#imageSlideNumber span',
-          { y: 15 * direction, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.5, ease: this.customEase, delay: 0.05 }
-        );
-        gsap.fromTo('#imageSlideTitle h1',
-          { y: 30 * direction, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.5, ease: this.customEase, delay: 0.1 }
-        );
-        if (this.descriptionLines) {
-          gsap.fromTo(this.descriptionLines,
-            { y: 40 * direction, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: this.customEase, delay: 0.15, stagger: 0.08 }
-          );
-        }
       }
     });
   }
@@ -1740,7 +1574,7 @@ initDraggable() {
     dragClickables: true,
     allowNativeTouchScrolling: false,
     zIndexBoost: false,
-    minimumMovement: 3,
+    minimumMovement: this.isMobile ? 10 : 3,
     liveSnap: {
       x: (value) => {
         const b = this._dragBounds;
@@ -1753,6 +1587,16 @@ initDraggable() {
         if (value > b.maxY) return b.maxY + (value - b.maxY) * edgeResistance;
         if (value < b.minY) return b.minY + (value - b.minY) * edgeResistance;
         return value;
+      }
+    },
+    onClick: (e) => {
+      // GSAP fires onClick only when it was NOT a drag — reliable on mobile
+      const item = e.target.closest(".grid-item");
+      if (!item || this.zoomState.isActive) return;
+      const itemData = this.gridItems.find(d => d.element === item);
+      if (itemData) {
+        this.soundSystem.play("click");
+        this.enterZoomMode(itemData);
       }
     },
     onDragStart: () => {
