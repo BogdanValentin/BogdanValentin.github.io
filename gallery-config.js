@@ -1,37 +1,26 @@
 // ========================================================
 //  GALLERY CONFIGURATION
 //  --------------------------------------------------------
-//  Your photo categories live here. To populate a category:
+//  Photo categories for the gallery. To add/edit a category:
 //
 //  1. Place your images in  photos/<category>/
-//  2. List the filenames in the 'images' array below
-//  3. (Optional) Set a 'cover' path for the index preview
+//  2. Run optimize-photos.ps1 (or .sh) to generate thumbs/ and full/
+//  3. List the filenames in the 'images' array below
+//  4. (Optional) Set a 'cover' path for the index preview
 //
-//  Example:
+//  Category schema:
 //    {
-//      id: 'animals',
-//      label: 'Animals',
-//      cover: 'photos/animals/hero.jpg',
-//      images: [
-//        'photos/animals/01.jpg',
-//        'photos/animals/02.jpg',
-//        'photos/animals/03.jpg'
-//      ],
-//      imageData: [
-//        { number: '01', title: 'Morning Visitor', description: 'A fox at dawn.' },
-//        { number: '02', title: 'Wings',           description: 'Heron in flight.' },
-//      ]
+//      id:     string   — unique slug used in code and URL
+//      label:  string   — display name shown in the category index
+//      cover:  string   — path to the hero/preview image
+//      images: string[] — paths to the original photos (thumbs/full
+//                         variants are resolved automatically by the JS)
 //    }
 //
-//  The gallery grid adapts automatically:
-//    \u2264 6 images  \u2192 2 \u00d7 3 grid
-//    \u2264 12 images \u2192 3 \u00d7 4 grid
-//    \u2264 20 images \u2192 4 \u00d7 5 grid
-//    ≤ 36 images  → 5 × 8 grid
-//    ≤ 96 images  → 8 × 12 grid
-//    ≤ 180 images → 12 × 15 grid
-//    ≤ 300 images → 15 × 20 grid
-//    > 300 images → 20 × 25 grid
+//  The gallery grid adapts automatically to image count:
+//    ≤ 6   → 2×3    ≤ 12  → 3×4    ≤ 20  → 4×5
+//    ≤ 36  → 5×8    ≤ 96  → 8×12   ≤ 180 → 12×15
+//    ≤ 300 → 15×20  > 300 → 20×25
 //
 //  Categories with no images will use built-in placeholders.
 // ========================================================
@@ -95,61 +84,6 @@ const GALLERY_CATEGORIES = [
       'photos/animals/DSC_7537.jpg',
       'photos/animals/DSC_7563.jpg',
       'photos/animals/DSC_7615.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Animal 1', description: '' },
-      { number: '02', title: 'Animal 2', description: '' },
-      { number: '03', title: 'Animal 3', description: '' },
-      { number: '04', title: 'Animal 4', description: '' },
-      { number: '05', title: 'Animal 5', description: '' },
-      { number: '06', title: 'Animal 6', description: '' },
-      { number: '07', title: 'Animal 7', description: '' },
-      { number: '08', title: 'Animal 8', description: '' },
-      { number: '09', title: 'Animal 9', description: '' },
-      { number: '10', title: 'Animal 10', description: '' },
-      { number: '11', title: 'Animal 11', description: '' },
-      { number: '12', title: 'Animal 12', description: '' },
-      { number: '13', title: 'Animal 13', description: '' },
-      { number: '14', title: 'Animal 14', description: '' },
-      { number: '15', title: 'Animal 15', description: '' },
-      { number: '16', title: 'Animal 16', description: '' },
-      { number: '17', title: 'Animal 17', description: '' },
-      { number: '18', title: 'Animal 18', description: '' },
-      { number: '19', title: 'Animal 19', description: '' },
-      { number: '20', title: 'Animal 20', description: '' },
-      { number: '21', title: 'Animal 21', description: '' },
-      { number: '22', title: 'Animal 22', description: '' },
-      { number: '23', title: 'Animal 23', description: '' },
-      { number: '24', title: 'Animal 24', description: '' },
-      { number: '25', title: 'Animal 25', description: '' },
-      { number: '26', title: 'Animal 26', description: '' },
-      { number: '27', title: 'Animal 27', description: '' },
-      { number: '28', title: 'Animal 28', description: '' },
-      { number: '29', title: 'Animal 29', description: '' },
-      { number: '30', title: 'Animal 30', description: '' },
-      { number: '31', title: 'Animal 31', description: '' },
-      { number: '32', title: 'Animal 32', description: '' },
-      { number: '33', title: 'Animal 33', description: '' },
-      { number: '34', title: 'Animal 34', description: '' },
-      { number: '35', title: 'Animal 35', description: '' },
-      { number: '36', title: 'Animal 36', description: '' },
-      { number: '37', title: 'Animal 37', description: '' },
-      { number: '38', title: 'Animal 38', description: '' },
-      { number: '39', title: 'Animal 39', description: '' },
-      { number: '40', title: 'Animal 40', description: '' },
-      { number: '41', title: 'Animal 41', description: '' },
-      { number: '42', title: 'Animal 42', description: '' },
-      { number: '43', title: 'Animal 43', description: '' },
-      { number: '44', title: 'Animal 44', description: '' },
-      { number: '45', title: 'Animal 45', description: '' },
-      { number: '46', title: 'Animal 46', description: '' },
-      { number: '47', title: 'Animal 47', description: '' },
-      { number: '48', title: 'Animal 48', description: '' },
-      { number: '49', title: 'Animal 49', description: '' },
-      { number: '50', title: 'Animal 50', description: '' },
-      { number: '51', title: 'Animal 51', description: '' },
-      { number: '52', title: 'Animal 52', description: '' },
-      { number: '53', title: 'Animal 53', description: '' }
     ]
   },
   {
@@ -193,44 +127,6 @@ const GALLERY_CATEGORIES = [
       'photos/architecture/DSC_7445.jpg',
       'photos/architecture/DSC_7467.jpg',
       'photos/architecture/DSC_7619.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Architecture 1', description: '' },
-      { number: '02', title: 'Architecture 2', description: '' },
-      { number: '03', title: 'Architecture 3', description: '' },
-      { number: '04', title: 'Architecture 4', description: '' },
-      { number: '05', title: 'Architecture 5', description: '' },
-      { number: '06', title: 'Architecture 6', description: '' },
-      { number: '07', title: 'Architecture 7', description: '' },
-      { number: '08', title: 'Architecture 8', description: '' },
-      { number: '09', title: 'Architecture 9', description: '' },
-      { number: '10', title: 'Architecture 10', description: '' },
-      { number: '11', title: 'Architecture 11', description: '' },
-      { number: '12', title: 'Architecture 12', description: '' },
-      { number: '13', title: 'Architecture 13', description: '' },
-      { number: '14', title: 'Architecture 14', description: '' },
-      { number: '15', title: 'Architecture 15', description: '' },
-      { number: '16', title: 'Architecture 16', description: '' },
-      { number: '17', title: 'Architecture 17', description: '' },
-      { number: '18', title: 'Architecture 18', description: '' },
-      { number: '19', title: 'Architecture 19', description: '' },
-      { number: '20', title: 'Architecture 20', description: '' },
-      { number: '21', title: 'Architecture 21', description: '' },
-      { number: '22', title: 'Architecture 22', description: '' },
-      { number: '23', title: 'Architecture 23', description: '' },
-      { number: '24', title: 'Architecture 24', description: '' },
-      { number: '25', title: 'Architecture 25', description: '' },
-      { number: '26', title: 'Architecture 26', description: '' },
-      { number: '27', title: 'Architecture 27', description: '' },
-      { number: '28', title: 'Architecture 28', description: '' },
-      { number: '29', title: 'Architecture 29', description: '' },
-      { number: '30', title: 'Architecture 30', description: '' },
-      { number: '31', title: 'Architecture 31', description: '' },
-      { number: '32', title: 'Architecture 32', description: '' },
-      { number: '33', title: 'Architecture 33', description: '' },
-      { number: '34', title: 'Architecture 34', description: '' },
-      { number: '35', title: 'Architecture 35', description: '' },
-      { number: '36', title: 'Architecture 36', description: '' }
     ]
   },
   {
@@ -261,31 +157,6 @@ const GALLERY_CATEGORIES = [
       'photos/portraits/DSC_5905.jpg',
       'photos/portraits/DSC_5936.jpg',
       'photos/portraits/DSC_5960.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Portrait 1', description: '' },
-      { number: '02', title: 'Portrait 2', description: '' },
-      { number: '03', title: 'Portrait 3', description: '' },
-      { number: '04', title: 'Portrait 4', description: '' },
-      { number: '05', title: 'Portrait 5', description: '' },
-      { number: '06', title: 'Portrait 6', description: '' },
-      { number: '07', title: 'Portrait 7', description: '' },
-      { number: '08', title: 'Portrait 8', description: '' },
-      { number: '09', title: 'Portrait 9', description: '' },
-      { number: '10', title: 'Portrait 10', description: '' },
-      { number: '11', title: 'Portrait 11', description: '' },
-      { number: '12', title: 'Portrait 12', description: '' },
-      { number: '13', title: 'Portrait 13', description: '' },
-      { number: '14', title: 'Portrait 14', description: '' },
-      { number: '15', title: 'Portrait 15', description: '' },
-      { number: '16', title: 'Portrait 16', description: '' },
-      { number: '17', title: 'Portrait 17', description: '' },
-      { number: '18', title: 'Portrait 18', description: '' },
-      { number: '19', title: 'Portrait 19', description: '' },
-      { number: '20', title: 'Portrait 20', description: '' },
-      { number: '21', title: 'Portrait 21', description: '' },
-      { number: '22', title: 'Portrait 22', description: '' },
-      { number: '23', title: 'Portrait 23', description: '' }
     ]
   },
   {
@@ -316,31 +187,6 @@ const GALLERY_CATEGORIES = [
       'photos/sport/DSC07066.jpg',
       'photos/sport/DSC07123.jpg',
       'photos/sport/DSC07234.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Sport 1', description: '' },
-      { number: '02', title: 'Sport 2', description: '' },
-      { number: '03', title: 'Sport 3', description: '' },
-      { number: '04', title: 'Sport 4', description: '' },
-      { number: '05', title: 'Sport 5', description: '' },
-      { number: '06', title: 'Sport 6', description: '' },
-      { number: '07', title: 'Sport 7', description: '' },
-      { number: '08', title: 'Sport 8', description: '' },
-      { number: '09', title: 'Sport 9', description: '' },
-      { number: '10', title: 'Sport 10', description: '' },
-      { number: '11', title: 'Sport 11', description: '' },
-      { number: '12', title: 'Sport 12', description: '' },
-      { number: '13', title: 'Sport 13', description: '' },
-      { number: '14', title: 'Sport 14', description: '' },
-      { number: '15', title: 'Sport 15', description: '' },
-      { number: '16', title: 'Sport 16', description: '' },
-      { number: '17', title: 'Sport 17', description: '' },
-      { number: '18', title: 'Sport 18', description: '' },
-      { number: '19', title: 'Sport 19', description: '' },
-      { number: '20', title: 'Sport 20', description: '' },
-      { number: '21', title: 'Sport 21', description: '' },
-      { number: '22', title: 'Sport 22', description: '' },
-      { number: '23', title: 'Sport 23', description: '' }
     ]
   },
   {
@@ -372,32 +218,6 @@ const GALLERY_CATEGORIES = [
       'photos/landscapes/DSC_7471.jpg',
       'photos/landscapes/DSC_7579.jpg',
       'photos/landscapes/DSC_7797.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Landscape 1', description: '' },
-      { number: '02', title: 'Landscape 2', description: '' },
-      { number: '03', title: 'Landscape 3', description: '' },
-      { number: '04', title: 'Landscape 4', description: '' },
-      { number: '05', title: 'Landscape 5', description: '' },
-      { number: '06', title: 'Landscape 6', description: '' },
-      { number: '07', title: 'Landscape 7', description: '' },
-      { number: '08', title: 'Landscape 8', description: '' },
-      { number: '09', title: 'Landscape 9', description: '' },
-      { number: '10', title: 'Landscape 10', description: '' },
-      { number: '11', title: 'Landscape 11', description: '' },
-      { number: '12', title: 'Landscape 12', description: '' },
-      { number: '13', title: 'Landscape 13', description: '' },
-      { number: '14', title: 'Landscape 14', description: '' },
-      { number: '15', title: 'Landscape 15', description: '' },
-      { number: '16', title: 'Landscape 16', description: '' },
-      { number: '17', title: 'Landscape 17', description: '' },
-      { number: '18', title: 'Landscape 18', description: '' },
-      { number: '19', title: 'Landscape 19', description: '' },
-      { number: '20', title: 'Landscape 20', description: '' },
-      { number: '21', title: 'Landscape 21', description: '' },
-      { number: '22', title: 'Landscape 22', description: '' },
-      { number: '23', title: 'Landscape 23', description: '' },
-      { number: '24', title: 'Landscape 24', description: '' }
     ]
   },
   {
@@ -413,16 +233,6 @@ const GALLERY_CATEGORIES = [
       'photos/astronomy/6.jpg',
       'photos/astronomy/7.jpg',
       'photos/astronomy/8.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Astronomy 1', description: '' },
-      { number: '02', title: 'Astronomy 2', description: '' },
-      { number: '03', title: 'Astronomy 3', description: '' },
-      { number: '04', title: 'Astronomy 4', description: '' },
-      { number: '05', title: 'Astronomy 5', description: '' },
-      { number: '06', title: 'Astronomy 6', description: '' },
-      { number: '07', title: 'Astronomy 7', description: '' },
-      { number: '08', title: 'Astronomy 8', description: '' }
     ]
   },
   {
@@ -438,16 +248,6 @@ const GALLERY_CATEGORIES = [
       'photos/flowers/6.jpg',
       'photos/flowers/7.jpg',
       'photos/flowers/8.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Flower 1', description: '' },
-      { number: '02', title: 'Flower 2', description: '' },
-      { number: '03', title: 'Flower 3', description: '' },
-      { number: '04', title: 'Flower 4', description: '' },
-      { number: '05', title: 'Flower 5', description: '' },
-      { number: '06', title: 'Flower 6', description: '' },
-      { number: '07', title: 'Flower 7', description: '' },
-      { number: '08', title: 'Flower 8', description: '' }
     ]
   },
   {
@@ -473,26 +273,6 @@ const GALLERY_CATEGORIES = [
       'photos/events/DSC_6898-Enhanced-NR.jpg',
       'photos/events/DSC_6957.jpg',
       'photos/events/DSC_6965.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Event 1', description: '' },
-      { number: '02', title: 'Event 2', description: '' },
-      { number: '03', title: 'Event 3', description: '' },
-      { number: '04', title: 'Event 4', description: '' },
-      { number: '05', title: 'Event 5', description: '' },
-      { number: '06', title: 'Event 6', description: '' },
-      { number: '07', title: 'Event 7', description: '' },
-      { number: '08', title: 'Event 8', description: '' },
-      { number: '09', title: 'Event 9', description: '' },
-      { number: '10', title: 'Event 10', description: '' },
-      { number: '11', title: 'Event 11', description: '' },
-      { number: '12', title: 'Event 12', description: '' },
-      { number: '13', title: 'Event 13', description: '' },
-      { number: '14', title: 'Event 14', description: '' },
-      { number: '15', title: 'Event 15', description: '' },
-      { number: '16', title: 'Event 16', description: '' },
-      { number: '17', title: 'Event 17', description: '' },
-      { number: '18', title: 'Event 18', description: '' }
     ]
   },
   {
@@ -506,14 +286,6 @@ const GALLERY_CATEGORIES = [
       'photos/art/DSC_7504.jpg',
       'photos/art/DSC_7505.jpg',
       'photos/art/DSC_7507.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Art 1', description: '' },
-      { number: '02', title: 'Art 2', description: '' },
-      { number: '03', title: 'Art 3', description: '' },
-      { number: '04', title: 'Art 4', description: '' },
-      { number: '05', title: 'Art 5', description: '' },
-      { number: '06', title: 'Art 6', description: '' }
     ]
   },
   {
@@ -540,27 +312,6 @@ const GALLERY_CATEGORIES = [
       'photos/autoportret/DSC_5982.jpg',
       'photos/autoportret/DSC_7293.jpg',
       'photos/autoportret/DSC_7647.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Autoportrait 1', description: '' },
-      { number: '02', title: 'Autoportrait 2', description: '' },
-      { number: '03', title: 'Autoportrait 3', description: '' },
-      { number: '04', title: 'Autoportrait 4', description: '' },
-      { number: '05', title: 'Autoportrait 5', description: '' },
-      { number: '06', title: 'Autoportrait 6', description: '' },
-      { number: '07', title: 'Autoportrait 7', description: '' },
-      { number: '08', title: 'Autoportrait 8', description: '' },
-      { number: '09', title: 'Autoportrait 9', description: '' },
-      { number: '10', title: 'Autoportrait 10', description: '' },
-      { number: '11', title: 'Autoportrait 11', description: '' },
-      { number: '12', title: 'Autoportrait 12', description: '' },
-      { number: '13', title: 'Autoportrait 13', description: '' },
-      { number: '14', title: 'Autoportrait 14', description: '' },
-      { number: '15', title: 'Autoportrait 15', description: '' },
-      { number: '16', title: 'Autoportrait 16', description: '' },
-      { number: '17', title: 'Autoportrait 17', description: '' },
-      { number: '18', title: 'Autoportrait 18', description: '' },
-      { number: '19', title: 'Autoportrait 19', description: '' }
     ]
   },
   {
@@ -586,26 +337,6 @@ const GALLERY_CATEGORIES = [
       'photos/vehicles/19.jpg',
       'photos/vehicles/20.jpg',
       'photos/vehicles/volga.jpg'
-    ],
-    imageData: [
-      { number: '01', title: 'Vehicle 1', description: '' },
-      { number: '02', title: 'Vehicle 2', description: '' },
-      { number: '03', title: 'Vehicle 3', description: '' },
-      { number: '04', title: 'Vehicle 4', description: '' },
-      { number: '05', title: 'Vehicle 5', description: '' },
-      { number: '06', title: 'Vehicle 6', description: '' },
-      { number: '07', title: 'Vehicle 7', description: '' },
-      { number: '08', title: 'Vehicle 8', description: '' },
-      { number: '09', title: 'Vehicle 9', description: '' },
-      { number: '10', title: 'Vehicle 10', description: '' },
-      { number: '11', title: 'Vehicle 11', description: '' },
-      { number: '12', title: 'Vehicle 12', description: '' },
-      { number: '13', title: 'Vehicle 13', description: '' },
-      { number: '14', title: 'Vehicle 14', description: '' },
-      { number: '15', title: 'Vehicle 15', description: '' },
-      { number: '16', title: 'Vehicle 16', description: '' },
-      { number: '17', title: 'Vehicle 17', description: '' },
-      { number: '18', title: 'Vehicle 18', description: '' }
     ]
   },
 ];
