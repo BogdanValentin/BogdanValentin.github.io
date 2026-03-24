@@ -1290,7 +1290,8 @@ class FashionGallery {
       if (this.zoomState.isActive || this.isMobile) return;
       e.preventDefault();
 
-      const minZoom = this.calculateFitZoom();
+      const fitZoom = this.calculateFitZoom();
+      const minZoom = fitZoom;
       const maxZoom = 1.0;
       const zoomSpeed = 0.001;
 
@@ -1298,6 +1299,11 @@ class FashionGallery {
       // Scroll-up (negative deltaY) = zoom in
       let newZoom = oldTargetZoom - e.deltaY * zoomSpeed;
       newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+      // If at or below fit zoom, snap to center so the grid can't drift out of bounds
+      if (newZoom <= fitZoom + 0.01) {
+        newZoom = fitZoom;
+      }
       if (newZoom === oldTargetZoom) return;
 
       // Read current rendered position for cursor-anchored zoom
@@ -1394,6 +1400,58 @@ class FashionGallery {
       this.calculateGridDimensions(newGap);
       this.initDraggable();
     }
+  }
+  /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0. */
+  initPinchZoom() {
+    let startDist = 0;
+    let startZoom = this.config.currentZoom;
+
+    const getDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    this.viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        startDist = getDistance(e.touches);
+        startZoom = this.config.currentZoom;
+      }
+    }, { passive: true });
+
+    this.viewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 2 || this.zoomState.isActive) return;
+      e.preventDefault();
+
+      const dist = getDistance(e.touches);
+      const scale = dist / startDist;
+      const fitZoom = this.calculateFitZoom();
+      let newZoom = Math.max(fitZoom, Math.min(1.0, startZoom * scale));
+
+      this.config.currentZoom = newZoom;
+
+      // Center the grid at the new zoom
+      this.calculateGridDimensions(this.config.currentGap);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const { scaledWidth, scaledHeight } = this.gridDimensions;
+      const cx = (vw - scaledWidth) / 2;
+      const cy = (vh - scaledHeight) / 2;
+
+      gsap.set(this.canvasWrapper, { scale: newZoom, x: cx, y: cy });
+      this.lastValidPosition.x = cx;
+      this.lastValidPosition.y = cy;
+      this.updatePercentageIndicator(newZoom);
+    }, { passive: false });
+
+    this.viewport.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2 && startDist > 0) {
+        startDist = 0;
+        // Finalize: update gap + draggable bounds
+        this.finalizeScrollZoom(this.config.currentZoom);
+        this.updateZoomButtonHighlight(this.config.currentZoom);
+      }
+    }, { passive: true });
   }
   updateZoomButtonHighlight(zoomLevel) {
     const buttons = document.querySelectorAll(".switch-button");
@@ -1965,9 +2023,11 @@ initDraggable() {
 
     // Zoom control buttons — zoom sounds already play via setZoom/autoFitZoom
 
-    // Scroll-wheel zoom (desktop only)
+    // Scroll-wheel zoom (desktop) / pinch zoom (mobile)
     if (!this.isMobile) {
       this.initScrollZoom();
+    } else {
+      this.initPinchZoom();
     }
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {

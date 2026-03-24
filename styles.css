@@ -1559,12 +1559,12 @@ h3 {
     height: 14px;
   }
 
-  /* Image nav buttons on mobile */
+  /* Image nav buttons on mobile — bottom row, inline with mute */
   .image-nav-btn {
     width: 40px;
     height: 40px;
     top: auto;
-    bottom: 5rem;
+    bottom: 0.75em;
     transform: none;
   }
 
