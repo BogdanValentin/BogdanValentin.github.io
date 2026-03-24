@@ -178,7 +178,6 @@ class FashionGallery {
     this.canvasWrapper = document.getElementById("canvasWrapper");
     this.gridContainer = document.getElementById("gridContainer");
     this.splitScreenContainer = document.getElementById("splitScreenContainer");
-    this.closeButton = document.getElementById("closeButton");
     this.navPrev = document.getElementById("navPrev");
     this.navNext = document.getElementById("navNext");
     this.controlsContainer = document.getElementById("controlsContainer");
@@ -779,21 +778,6 @@ class FashionGallery {
       }
     });
     this.controlsContainer.classList.add("split-mode");
-    gsap.fromTo(
-      this.closeButton,
-      {
-        x: 20,
-        opacity: 0
-      },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "power2.out",
-        delay: 0.9
-      }
-    );
-    this.closeButton.classList.add("active");
     // Show nav buttons
     this.navPrev.classList.add("active");
     this.navNext.classList.add("active");
@@ -814,7 +798,7 @@ class FashionGallery {
   handleSplitAreaClick(e) {
     // Close when tapping empty space around the image, but not on
     // interactive elements (close button, nav buttons, title overlay)
-    if (e.target.closest(".close-button, .image-nav-btn")) return;
+    if (e.target.closest(".image-nav-btn")) return;
     this.exitZoomMode();
   }
   exitZoomMode() {
@@ -834,7 +818,6 @@ class FashionGallery {
       splitRight.removeEventListener("click", this._boundHandleSplitAreaClick);
     // Kill any pending/delayed tweens on the close button and nav buttons
     // to prevent the enterZoomMode animations (delayed) from re-showing them
-    gsap.killTweensOf(this.closeButton);
     gsap.killTweensOf(this.navPrev);
     gsap.killTweensOf(this.navNext);
     const splitContainer = this.splitScreenContainer;
@@ -844,7 +827,6 @@ class FashionGallery {
       this.zoomState.flipAnimation.kill();
     }
     // Remove active class immediately so pointer-events are disabled
-    this.closeButton.classList.remove("active");
     // Hide nav buttons
     this.navPrev.classList.remove("active");
     this.navNext.classList.remove("active");
@@ -852,12 +834,6 @@ class FashionGallery {
     gsap.to(this.navNext, { opacity: 0, y: 15, duration: 0.3, ease: "power2.in" });
     this.navPrev.onclick = null;
     this.navNext.onclick = null;
-    gsap.to(this.closeButton, {
-      duration: 0.3,
-      opacity: 0,
-      x: 20,
-      ease: "power2.in"
-    });
     splitContainer.classList.remove("active");
     this.controlsContainer.classList.remove("split-mode");
     gsap.to(splitContainer, {
@@ -1990,7 +1966,6 @@ initDraggable() {
       document.addEventListener("mouseleave", () => this.handleMouseLeave());
       this.viewport.addEventListener("mouseleave", () => this.handleMouseLeave());
     }
-    this.closeButton.addEventListener("click", () => this.exitZoomMode());
     this.soundToggle.addEventListener("click", () => this.soundSystem.toggle());
     // Category index triggers
     const indexTrigger = document.getElementById('indexTrigger');
