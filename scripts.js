@@ -268,7 +268,7 @@ class FashionGallery {
       _lastPlayTime: {},
       _debounceMs: {
         "drag-start": 300,
-        "click": 300,
+        "click": 100,
         "button": 200,
         "liftoff": 400,
         "land": 400,
@@ -440,6 +440,35 @@ class FashionGallery {
           noise.start(t);
           noise.stop(t + 0.25);
         },
+        // Nav click — deep bass thump with digital texture
+        navClick: () => {
+          const ctx = this.soundSystem._getCtx();
+          const t = ctx.currentTime;
+          // Sub-bass thump
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(180, t);
+          osc.frequency.exponentialRampToValueAtTime(50, t + 0.08);
+          // Low noise texture
+          const bufLen = ctx.sampleRate * 0.05;
+          const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufLen * 0.1));
+          const noise = ctx.createBufferSource();
+          noise.buffer = buf;
+          const lp = ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.setValueAtTime(500, t);
+          lp.frequency.exponentialRampToValueAtTime(120, t + 0.04);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+          osc.connect(gain);
+          noise.connect(lp).connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t); osc.stop(t + 0.08);
+          noise.start(t); noise.stop(t + 0.05);
+        },
         // Confirmation ping — successful action
         confirm: () => {
           const ctx = this.soundSystem._getCtx();
@@ -482,6 +511,7 @@ class FashionGallery {
         this.soundSystem._lastPlayTime[soundName] = now;
         try {
           const audio = this.soundSystem.sounds[soundName];
+          audio.pause();
           audio.currentTime = 0;
           audio.play().catch(() => {});
         } catch (e) {
@@ -897,6 +927,7 @@ class FashionGallery {
   }
   navigateZoom(direction) {
     if (!this.zoomState.isActive || !this.zoomState.selectedItem) return;
+    this.soundSystem.playSynth('navClick');
     if (this._isNavigating) return;
     this._isNavigating = true;
 
@@ -905,8 +936,6 @@ class FashionGallery {
     const totalItems = this.gridItems.length;
     const newIndex = (currentIndex + direction + totalItems) % totalItems;
     const newItemData = this.gridItems[newIndex];
-
-    this.soundSystem.play('click');
 
     const overlay = this.zoomState.scalingOverlay;
     if (!overlay) { this._isNavigating = false; return; }
