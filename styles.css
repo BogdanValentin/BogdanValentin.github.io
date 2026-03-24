@@ -871,9 +871,7 @@ h3 {
   letter-spacing: -0.02em;
   transition: color 0.3s ease;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .category-row:hover .category-number {
