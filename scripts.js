@@ -2095,6 +2095,23 @@ function initMobileMenu() {
     }
   });
 
+  // Footer mobile About/Contact links
+  document.querySelectorAll('.footer-links-mobile a[data-panel]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const panel = link.dataset.panel;
+      if (panel && gallery) {
+        if (!gallery.indexOpen) {
+          gallery.openCategoryIndex();
+          btn.classList.add('open');
+          setTimeout(() => gallery.showIndexPanel(panel), 500);
+        } else {
+          gallery.showIndexPanel(panel);
+        }
+      }
+    });
+  });
+
   // Mobile menu nav links
   document.querySelectorAll('.mobile-menu-link').forEach(link => {
     link.addEventListener('click', (e) => {

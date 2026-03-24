@@ -47,6 +47,10 @@ body.zoom-mode .footer > * {
   pointer-events: none;
 }
 
+body.zoom-mode .footer-links-mobile {
+  display: none !important;
+}
+
 .preloader-overlay {
   background: #000;
 }
@@ -272,6 +276,16 @@ body.zoom-mode .footer > * {
 /* Footer text styling */
 .footer p {
   font-family: "TheGoodMonolith", monospace;
+}
+
+/* Footer mobile About/Contact links — hidden on desktop */
+.footer-links-mobile {
+  display: none;
+}
+
+.footer-sep {
+  margin: 0 0.5rem;
+  opacity: 0.4;
 }
 
 /* Global link styling */
@@ -1391,8 +1405,31 @@ h3 {
     display: block;
   }
 
-  /* Footer: hide on mobile to avoid blocking controls */
+  /* Footer: show About/Contact links on mobile */
   .footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+  }
+
+  .footer-links-mobile {
+    display: flex;
+    align-items: center;
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-links-mobile a {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-links-mobile a::after {
     display: none;
   }
 
