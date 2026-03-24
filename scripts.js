@@ -924,7 +924,8 @@ class FashionGallery {
     if (this._isNavigating) return;
     this._isNavigating = true;
 
-    const currentIndex = this.zoomState.selectedItem.index;
+    const prevItem = this.zoomState.selectedItem;
+    const currentIndex = prevItem.index;
     const totalItems = this.gridItems.length;
     const newIndex = (currentIndex + direction + totalItems) % totalItems;
     const newItemData = this.gridItems[newIndex];
@@ -943,6 +944,11 @@ class FashionGallery {
       duration: 0.2,
       ease: 'power2.in',
       onComplete: () => {
+        // Restore the previous grid thumbnail, hide the new one
+        // so the close animation can "return" the image to its slot
+        gsap.set(prevItem.img, { opacity: 1 });
+        gsap.set(newItemData.img, { opacity: 0 });
+
         // Show thumbnail immediately, then swap to full once loaded
         const img = overlay.querySelector('img');
         const thumbSrc = this.toThumbPath(newItemData.imageUrl);
@@ -1554,10 +1560,6 @@ initDraggable() {
         opacity: 0
       });
     });
-
-    // Shuffle order so fade-in is random
-    const shuffled = [...this.gridItems].sort(() => Math.random() - 0.5);
-    const totalWindow = 2; // all done within 2 seconds
 
     // Each item gets a random delay and random duration
     const tl = gsap.timeline({
