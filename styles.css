@@ -732,6 +732,7 @@ h3 {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* dvh accounts for mobile browser address bar */
   background: rgba(0, 0, 0, 0.97);
   z-index: 15000;
   /* Grid gives .category-index-inner a guaranteed definite height */
