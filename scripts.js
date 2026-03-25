@@ -171,6 +171,15 @@ class PreloaderManager {
  *   config            – grid dimensions, zoom level, gap
  *   activeCategory    – current category id ('all' | category slug)
  */
+const CONSTANTS = {
+  ZOOM:      { NORMAL: 0.6, MAX: 1.0 },
+  GRID:      { WIDTH: 400, HEIGHT: 300, WIDTH_MOBILE: 260, HEIGHT_MOBILE: 195 },
+  GAP:       { LARGE: 64, NORMAL: 32, TIGHT: 16 },
+  ANIMATION: { ZOOM_DURATION: 1.2, FADE_DURATION: 0.8 },
+  BREAKPOINT_MOBILE: 768,
+  SWIPE_THRESHOLD: 60,
+};
+
 class FashionGallery {
   constructor() {
     // DOM elements
@@ -186,11 +195,11 @@ class FashionGallery {
     this.customEase = CustomEase.create("smooth", ".87,0,.13,1");
     this.centerEase = CustomEase.create("center", ".25,.46,.45,.94");
     // Detect mobile
-    this.isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024);
+    this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE || ('ontouchstart' in window && window.innerWidth <= 1024);
     // Configuration — grid adapts to aspect ratio
     this.config = {
-      itemWidth: this.isMobile ? 260 : 400,
-      itemHeight: this.isMobile ? 195 : 300,
+      itemWidth: this.isMobile ? CONSTANTS.GRID.WIDTH_MOBILE : CONSTANTS.GRID.WIDTH,
+      itemHeight: this.isMobile ? CONSTANTS.GRID.HEIGHT_MOBILE : CONSTANTS.GRID.HEIGHT,
       baseGap: this.isMobile ? 10 : 16,
       rows: 8, // will be set below
       cols: 12, // will be set below
@@ -985,7 +994,7 @@ class FashionGallery {
 
   initZoomSwipe() {
     const container = this.splitScreenContainer;
-    const THRESHOLD = 60; // px to commit a swipe
+    const THRESHOLD = CONSTANTS.SWIPE_THRESHOLD;
     let startX = 0;
     let startY = 0;
     let tracking = false; // true once we've confirmed horizontal intent
@@ -1047,8 +1056,8 @@ class FashionGallery {
     const totalPhotos = GALLERY_CATEGORIES.reduce((s, c) => s + c.images.length, 0);
     allRow.innerHTML = `
       <span class="category-number">✦</span>
-      <span class="category-name">All Work</span>
-      <span class="category-line"></span>
+      <span class="category-name">✦ All Work</span>
+
       <span class="category-count">${totalPhotos > 0 ? totalPhotos : '—'}</span>
     `;
     allRow.addEventListener('mouseenter', () => { this.updateCategoryPreview('all', 'All'); });
@@ -1063,7 +1072,7 @@ class FashionGallery {
       row.innerHTML = `
         <span class="category-number">${num}</span>
         <span class="category-name">${cat.label}</span>
-        <span class="category-line"></span>
+  
         <span class="category-count">${cat.images.length > 0 ? cat.images.length : '—'}</span>
       `;
       row.addEventListener('mouseenter', () => { this.updateCategoryPreview(cat.id, cat.label); });
@@ -2049,7 +2058,7 @@ initDraggable() {
   setupEventListeners() {
     window.addEventListener("resize", () => {
       // Re-detect mobile on resize/orientation change
-      this.isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024);
+      this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE || ('ontouchstart' in window && window.innerWidth <= 1024);
       // Skip reset when in zoom mode (e.g. fullscreen toggle triggers resize)
       if (this.zoomState.isActive) return;
       setTimeout(() => {
