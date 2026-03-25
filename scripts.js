@@ -983,6 +983,57 @@ class FashionGallery {
   }
 
 
+  initZoomSwipe() {
+    const container = this.splitScreenContainer;
+    const THRESHOLD = 60; // px to commit a swipe
+    let startX = 0;
+    let startY = 0;
+    let tracking = false; // true once we've confirmed horizontal intent
+
+    container.addEventListener('touchstart', (e) => {
+      if (!this.zoomState.isActive || e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = false;
+      // stop any spring-back in progress
+      if (this.zoomState.scalingOverlay) gsap.killTweensOf(this.zoomState.scalingOverlay, 'x,opacity');
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      if (!this.zoomState.isActive || !this.zoomState.scalingOverlay || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      // lock to vertical scroll if that's clearly the intent
+      if (!tracking && Math.abs(dy) > Math.abs(dx)) return;
+      tracking = true;
+      e.preventDefault();
+
+      const progress = Math.min(Math.abs(dx) / THRESHOLD, 1);
+      gsap.set(this.zoomState.scalingOverlay, {
+        x: dx * 0.65,
+        opacity: 1 - progress * 0.25,
+      });
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+      if (!this.zoomState.isActive || !this.zoomState.scalingOverlay || !tracking) return;
+      tracking = false;
+      const dx = (e.changedTouches[0]?.clientX ?? startX) - startX;
+
+      if (Math.abs(dx) >= THRESHOLD) {
+        this.navigateZoom(dx < 0 ? 1 : -1);
+      } else {
+        // not enough — spring back
+        gsap.to(this.zoomState.scalingOverlay, {
+          x: 0, opacity: 1,
+          duration: 0.45,
+          ease: 'back.out(2)',
+        });
+      }
+    }, { passive: true });
+  }
+
   // --- Category Index ---
   buildCategoryIndex() {
     const list = document.getElementById('categoryList');
@@ -2050,6 +2101,9 @@ initDraggable() {
     } else {
       this.initPinchZoom();
     }
+
+    // Swipe to navigate photos in zoom mode (touch devices)
+    this.initZoomSwipe();
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.indexOpen) { this.closeCategoryIndex(); return; }
