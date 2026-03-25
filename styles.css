@@ -1548,6 +1548,7 @@ h3 {
   .category-index-inner {
     padding: 0 1.5rem; /* remove top/bottom bars on mobile too */
     flex-direction: column;
+    min-height: 0; /* allow flex shrink so footer stays in view */
   }
 
   .category-list {
@@ -1555,6 +1556,7 @@ h3 {
     overflow-y: auto;
     justify-content: flex-start;
     padding: 3rem 0 1rem; /* clear the close button at the top */
+    min-height: 0; /* allow overflow-y: auto to work within flex */
   }
 
   .category-preview {
