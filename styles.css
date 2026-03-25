@@ -939,11 +939,13 @@ h3 {
   height: 70%;
   object-fit: contain;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transform: translate(-50%, -50%) scale(0.88);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .category-preview-img.visible {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 /* ---- Footer ---- */

@@ -1033,16 +1033,32 @@ class FashionGallery {
     const letter = document.getElementById('categoryPreviewLetter');
     const img = document.getElementById('categoryPreviewImg');
     if (!letter || !img) return;
-    letter.textContent = categoryId === 'all' ? '✦' : label.charAt(0).toUpperCase();
+
+    clearTimeout(this._previewTimer);
+
+    const newLetter = categoryId === 'all' ? '✦' : label.charAt(0).toUpperCase();
     const cat = GALLERY_CATEGORIES.find(c => c.id === categoryId);
-    if (cat && cat.cover) {
-      img.src = cat.cover;
-      img.classList.add('visible');
-      letter.style.opacity = '0.05';
-    } else {
+    const newSrc = cat && cat.cover ? cat.cover : null;
+
+    const applyUpdate = () => {
+      letter.textContent = newLetter;
+      if (newSrc) {
+        img.src = newSrc;
+        img.classList.add('visible');
+        letter.style.opacity = '0.05';
+      } else {
+        letter.style.opacity = '';
+        this._previewTimer = setTimeout(() => {
+          if (!img.classList.contains('visible')) img.src = '';
+        }, 350);
+      }
+    };
+
+    if (img.classList.contains('visible')) {
       img.classList.remove('visible');
-      img.src = '';
-      letter.style.opacity = '';
+      this._previewTimer = setTimeout(applyUpdate, 200);
+    } else {
+      applyUpdate();
     }
   }
   openCategoryIndex() {
