@@ -1019,6 +1019,15 @@ class FashionGallery {
       row.addEventListener('click', () => { this.switchCategory(cat.id); this.closeCategoryIndex(); });
       list.appendChild(row);
     });
+
+    const updateFade = () => {
+      const atTop = list.scrollTop <= 4;
+      const atBottom = list.scrollHeight - list.scrollTop <= list.clientHeight + 4;
+      list.classList.toggle('at-top', atTop);
+      list.classList.toggle('at-bottom', atBottom);
+    };
+    list.addEventListener('scroll', updateFade, { passive: true });
+    updateFade();
   }
   updateCategoryPreview(categoryId, label) {
     const letter = document.getElementById('categoryPreviewLetter');

@@ -737,6 +737,7 @@ h3 {
 }
 
 /* ===== CATEGORY INDEX OVERLAY ===== */
+/* ---- Category Index overlay ---- */
 .category-index {
   position: fixed;
   top: 0;
@@ -745,8 +746,9 @@ h3 {
   height: 100vh;
   background: rgba(0, 0, 0, 0.97);
   z-index: 15000;
-  display: flex;
-  flex-direction: column;
+  /* Grid gives .category-index-inner a guaranteed definite height */
+  display: grid;
+  grid-template-rows: 1fr auto;
   opacity: 0;
   pointer-events: none;
   backdrop-filter: blur(30px);
@@ -777,151 +779,138 @@ h3 {
 }
 
 .category-index-inner {
-  flex: 1;
+  min-height: 0;
   display: flex;
-  padding: 0 4rem; /* remove top/bottom bars */
+  padding: 0 4rem;
   gap: 2rem;
   overflow: hidden;
   position: relative;
 }
 
+/* ---- Category list ---- */
 .category-list {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0;
   max-width: 60%;
-}
-
-/* Make the category list scrollable when needed, but stay vertically centered when it fits */
-.category-list {
-  /* align from the top so first items remain visible on short viewports */
-  justify-content: flex-start;
   overflow-y: auto;
-  max-height: 100%;
-  margin: 0;
-  padding: 2rem 0 2rem 0; /* top/bottom spacing so buttons don't touch edges */
-  padding-right: 1.6rem; /* more room between counts and scrollbar */
-  scrollbar-width: auto;
-  scrollbar-color: rgba(166,75,35,0.9) transparent;
+  padding: 2.5rem 0;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 58%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 58%, transparent 100%);
 }
 
 .category-list::-webkit-scrollbar {
-  width: 12px;
-}
-.category-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-.category-list::-webkit-scrollbar-thumb {
-  background: rgba(166,75,35,0.6);
-  border-radius: 6px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-.category-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(166,75,35,0.85);
+  display: none;
 }
 
+.category-list.at-top {
+  -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 58%, transparent 100%);
+}
+
+.category-list.at-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%);
+}
+
+.category-list.at-top.at-bottom {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* ---- Category rows — new design ---- */
 .category-row {
   display: flex;
-  align-items: baseline;
-  gap: 1.25rem;
-  padding: 0.55rem 0;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 0.5rem 1rem 1rem;
   cursor: pointer;
   position: relative;
-  transform: translateX(0);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  overflow: hidden;
-  max-width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+}
+
+.category-row:first-child {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .category-row:hover {
-  transform: translateX(0.75rem);
+  padding-left: 2rem;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.category-row.category-row-active .category-number {
-  color: #A64B23;
+/* Vertical accent bar on left */
+.category-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  background: #A64B23;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.category-row.category-row-active .category-name {
-  color: #fff;
+.category-row:hover::before,
+.category-row.category-row-active::before {
+  transform: scaleY(1);
 }
 
-.category-row.category-row-active .category-line::after {
-  width: 100%;
-  background: rgba(166, 75, 35, 0.4);
+.category-row.category-row-active {
+  padding-left: 2rem;
 }
 
 .category-number {
   font-family: "TheGoodMonolith", monospace;
-  font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.1em;
-  min-width: 3rem;
-  transition: color 0.3s ease;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.15em;
+  min-width: 2rem;
   flex-shrink: 0;
+  transition: color 0.25s ease;
 }
 
 .category-name {
   font-family: "PPNeueMontreal", sans-serif;
-  font-size: clamp(1.6rem, 3vw, 2.8rem);
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: -0.02em;
-  transition: color 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.category-row:hover .category-number {
-  color: #A64B23;
-}
-
-.category-row:hover .category-name {
-  color: #fff;
-}
-
-.category-line {
+  font-size: clamp(1.4rem, 2.2vw, 2.4rem);
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: -0.025em;
+  line-height: 1;
   flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  min-width: 1rem;
-  position: relative;
+  transition: color 0.25s ease;
+  white-space: nowrap;
 }
 
-.category-line::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 100%;
-  background: #A64B23;
-  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.category-row:hover .category-line::after {
-  width: 100%;
+/* repurposed: thin spacer, no visual */
+.category-line {
+  display: none;
 }
 
 .category-count {
   font-family: "TheGoodMonolith", monospace;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.15);
-  letter-spacing: 0.08em;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.1em;
   flex-shrink: 0;
-  min-width: 4.2rem;
   text-align: right;
-  transition: color 0.3s ease;
+  transition: color 0.25s ease;
 }
 
-.category-row:hover .category-count {
-  color: rgba(255, 255, 255, 0.35);
-}
+.category-row:hover .category-number { color: rgba(166, 75, 35, 0.9); }
+.category-row:hover .category-name   { color: #ffffff; }
+.category-row:hover .category-count  { color: rgba(255, 255, 255, 0.3); }
 
-/* Preview area */
+.category-row.category-row-active .category-number { color: #A64B23; }
+.category-row.category-row-active .category-name   { color: #ffffff; }
+.category-row.category-row-active .category-count  { color: rgba(255, 255, 255, 0.3); }
+
+/* ---- Preview area ---- */
 .category-preview {
   width: 35%;
   display: flex;
@@ -957,7 +946,7 @@ h3 {
   opacity: 1;
 }
 
-/* Footer */
+/* ---- Footer ---- */
 .category-index-footer {
   display: flex;
   align-items: center;
@@ -1546,17 +1535,26 @@ h3 {
 
   /* Category Index — mobile */
   .category-index-inner {
-    padding: 0 1.5rem; /* remove top/bottom bars on mobile too */
+    padding: 0 1.5rem;
     flex-direction: column;
-    min-height: 0; /* allow flex shrink so footer stays in view */
   }
 
   .category-list {
     max-width: 100%;
-    overflow-y: auto;
-    justify-content: flex-start;
-    padding: 3rem 0 1rem; /* clear the close button at the top */
-    min-height: 0; /* allow overflow-y: auto to work within flex */
+    padding: 4rem 0 1.5rem;
+  }
+
+  .category-row {
+    padding: 0.85rem 0 0.85rem 1rem;
+  }
+
+  .category-row:hover,
+  .category-row.category-row-active {
+    padding-left: 1.6rem;
+  }
+
+  .category-name {
+    font-size: 1.4rem;
   }
 
   .category-preview {
