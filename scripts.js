@@ -1291,7 +1291,6 @@ class FashionGallery {
   switchCategory(categoryId) {
     if (categoryId === this.activeCategory) return;
     if (this.zoomState.isActive) this.exitZoomMode();
-    this.soundSystem.playSynth('whoosh');
     this.activeCategory = categoryId;
 
     // Update active highlight in the index
