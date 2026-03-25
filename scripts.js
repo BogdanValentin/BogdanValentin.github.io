@@ -1038,7 +1038,7 @@ class FashionGallery {
 
     const newLetter = categoryId === 'all' ? '✦' : label.charAt(0).toUpperCase();
     const cat = GALLERY_CATEGORIES.find(c => c.id === categoryId);
-    const newSrc = cat && cat.cover ? cat.cover : null;
+    const newSrc = cat && cat.cover ? this.toThumbPath(cat.cover) : null;
 
     const applyUpdate = () => {
       letter.textContent = newLetter;
