@@ -937,56 +937,59 @@ class FashionGallery {
   navigateZoom(direction) {
     if (!this.zoomState.isActive || !this.zoomState.selectedItem) return;
     this.soundSystem.playSynth('navClick');
-    if (this._isNavigating) return;
-    this._isNavigating = true;
-
-    const prevItem = this.zoomState.selectedItem;
-    const currentIndex = prevItem.index;
-    const totalItems = this.gridItems.length;
-    const newIndex = (currentIndex + direction + totalItems) % totalItems;
-    const newItemData = this.gridItems[newIndex];
 
     const overlay = this.zoomState.scalingOverlay;
-    if (!overlay) { this._isNavigating = false; return; }
+    if (!overlay) return;
 
-    const slideDir = direction > 0 ? -1 : 1;
+    // Kill any in-progress animation immediately — no blocking lock
+    gsap.killTweensOf(overlay);
+    if (this._navPreload)   { this._navPreload.onload = null; this._navPreload.src = ''; }
+    if (this._thumbPreload) { this._thumbPreload.onload = null; this._thumbPreload.onerror = null; this._thumbPreload.src = ''; }
 
-    // Animate current image out
+    // Update state immediately so rapid calls stay consistent
+    const prevItem = this.zoomState.selectedItem;
+    const totalItems = this.gridItems.length;
+    const newIndex = (prevItem.index + direction + totalItems) % totalItems;
+    const newItemData = this.gridItems[newIndex];
+
+    gsap.set(prevItem.img, { opacity: 1 });
+    gsap.set(newItemData.img, { opacity: 0 });
+    this.zoomState.selectedItem = newItemData;
+
+    const img = overlay.querySelector('img');
+    const thumbSrc = this.toThumbPath(newItemData.imageUrl);
+    const fullSrc  = this.toFullPath(newItemData.imageUrl);
+
+    // Token cancels stale preload callbacks from superseded navigations
+    if (!this._navToken) this._navToken = 0;
+    const token = ++this._navToken;
+
+    // Fast fade out → preload thumb → fade in
     gsap.to(overlay, {
-      x: slideDir * 80,
       opacity: 0,
-      duration: 0.2,
-      ease: 'power2.in',
+      duration: 0.08,
+      ease: 'none',
       onComplete: () => {
-        // Restore the previous grid thumbnail, hide the new one
-        // so the close animation can "return" the image to its slot
-        gsap.set(prevItem.img, { opacity: 1 });
-        gsap.set(newItemData.img, { opacity: 0 });
+        if (this._navToken !== token) return;
 
-        // Show thumbnail immediately, then swap to full once loaded
-        const img = overlay.querySelector('img');
-        const thumbSrc = this.toThumbPath(newItemData.imageUrl);
-        const fullSrc = this.toFullPath(newItemData.imageUrl);
-        img.src = thumbSrc;
-        // Update stored reference
-        this.zoomState.selectedItem = newItemData;
-        // Allow next navigation immediately
-        this._isNavigating = false;
-        // Animate in from opposite side
-        gsap.fromTo(overlay,
-          { x: -slideDir * 80, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
-        );
-        // Load full-size in background and swap when ready
-        // Cancel any previous preload so stale loads don't overwrite the current image
-        if (this._navPreload) { this._navPreload.onload = null; this._navPreload.src = ''; }
-        const pre = new Image();
-        this._navPreload = pre;
-        pre.onload = () => {
-          if (this._navPreload === pre) { img.src = fullSrc; }
+        const thumbPre = new Image();
+        this._thumbPreload = thumbPre;
+
+        const show = () => {
+          if (this._navToken !== token) return;
+          img.src = thumbSrc;
+          gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' });
+          // Upgrade to full-res in background
+          const pre = new Image();
+          this._navPreload = pre;
+          pre.onload = () => { if (this._navToken === token) img.src = fullSrc; };
+          pre.src = fullSrc;
         };
-        pre.src = fullSrc;
 
+        thumbPre.onload  = show;
+        thumbPre.onerror = show;
+        thumbPre.src     = thumbSrc;
+        if (thumbPre.complete) show();
       }
     });
   }
@@ -1005,7 +1008,10 @@ class FashionGallery {
       startY = e.touches[0].clientY;
       tracking = false;
       // stop any spring-back in progress
-      if (this.zoomState.scalingOverlay) gsap.killTweensOf(this.zoomState.scalingOverlay, 'x,opacity');
+      if (this.zoomState.scalingOverlay) {
+        gsap.killTweensOf(this.zoomState.scalingOverlay);
+        gsap.set(this.zoomState.scalingOverlay, { x: 0, opacity: 1 });
+      }
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
