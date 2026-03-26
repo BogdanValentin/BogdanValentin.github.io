@@ -849,7 +849,7 @@ h3 {
 
 .category-number {
   font-family: "TheGoodMonolith", monospace;
-  font-size: 0.7rem;
+  font-size: 1.0rem;
   color: rgba(255, 255, 255, 0.15);
   letter-spacing: 0.15em;
   min-width: 2rem;
@@ -872,7 +872,7 @@ h3 {
 
 .category-count {
   font-family: "TheGoodMonolith", monospace;
-  font-size: 0.65rem;
+  font-size: 1.0rem;
   color: rgba(255, 255, 255, 0.1);
   letter-spacing: 0.1em;
   flex-shrink: 0;
@@ -1549,7 +1549,7 @@ h3 {
   }
 
   .category-number {
-    font-size: 1rem;
+    font-size: 1.0rem;
     min-width: 2.5rem;
   }
 

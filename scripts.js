@@ -795,6 +795,7 @@ class FashionGallery {
       duration: 1.2,
       ease: this.customEase
     });
+
     this.zoomState.scalingOverlay = this.createScalingOverlay(
       selectedItemData.img
     );
