@@ -616,7 +616,7 @@ h3 {
   left: 0;
   z-index: 3;
   pointer-events: none;
-  will-change: transform, left, top, width, height, opacity;
+  will-change: transform, opacity;
   overflow: visible;
   display: flex;
   align-items: center;

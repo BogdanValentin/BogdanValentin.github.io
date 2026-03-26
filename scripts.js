@@ -802,15 +802,30 @@ class FashionGallery {
       opacity: 0
     });
 
-    // Animate overlay from thumbnail position to zoom target (reverse of close)
+    // Animate overlay from thumbnail position to zoom target using transforms (GPU-composited, no reflow)
     const overlay = this.zoomState.scalingOverlay;
+    const sourceRect = selectedItemData.img.getBoundingClientRect();
     const targetRect = zoomTarget.getBoundingClientRect();
 
-    this.zoomState.flipAnimation = gsap.to(overlay, {
+    // Set overlay to final size/position once (single layout), then use transforms to start at thumbnail
+    gsap.set(overlay, {
       left: targetRect.left,
       top: targetRect.top,
       width: targetRect.width,
       height: targetRect.height,
+      transformOrigin: "top left",
+      x: sourceRect.left - targetRect.left,
+      y: sourceRect.top - targetRect.top,
+      scaleX: sourceRect.width / targetRect.width,
+      scaleY: sourceRect.height / targetRect.height,
+    });
+
+    // Animate only transforms — no layout thrashing
+    this.zoomState.flipAnimation = gsap.to(overlay, {
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
       duration: 1.2,
       ease: this.customEase,
       onComplete: () => {
@@ -882,24 +897,28 @@ class FashionGallery {
     });
     // Get the actual on-screen positions before clearing transforms
     const overlay = this.zoomState.scalingOverlay;
-    const currentRect = overlay.getBoundingClientRect();
-    const targetRect = selectedElement.getBoundingClientRect();
+    const currentVisualRect = overlay.getBoundingClientRect();
+    const thumbRect = selectedElement.getBoundingClientRect();
 
-    // Clear Flip transforms and position overlay at its current visual location
+    // Clear transforms to read the overlay's base layout position
+    gsap.set(overlay, { clearProps: "x,y,scaleX,scaleY,scale" });
+    const baseRect = overlay.getBoundingClientRect();
+
+    // Restore current visual position using transforms (no layout change)
     gsap.set(overlay, {
-      clearProps: "transform",
-      left: currentRect.left,
-      top: currentRect.top,
-      width: currentRect.width,
-      height: currentRect.height
+      transformOrigin: "top left",
+      x: currentVisualRect.left - baseRect.left,
+      y: currentVisualRect.top - baseRect.top,
+      scaleX: currentVisualRect.width / baseRect.width,
+      scaleY: currentVisualRect.height / baseRect.height,
     });
 
-    // Animate smoothly from current position/size to the original thumbnail
+    // Animate transforms to thumbnail position — no layout thrashing
     gsap.to(overlay, {
-      left: targetRect.left,
-      top: targetRect.top,
-      width: targetRect.width,
-      height: targetRect.height,
+      x: thumbRect.left - baseRect.left,
+      y: thumbRect.top - baseRect.top,
+      scaleX: thumbRect.width / baseRect.width,
+      scaleY: thumbRect.height / baseRect.height,
       duration: 1.2,
       ease: this.customEase,
       onComplete: () => {
