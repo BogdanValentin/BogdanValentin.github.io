@@ -406,6 +406,12 @@ h3 {
   display: block;
   user-select: none;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.grid-item img.loaded {
+  opacity: 1;
 }
 
 /* Split Screen Layout */

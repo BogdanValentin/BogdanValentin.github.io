@@ -683,8 +683,8 @@ class FashionGallery {
         const img = document.createElement("img");
         img.src = this.toThumbPath(imageUrl);
         img.alt = `Fashion Portrait ${imageIndex}`;
-        img.loading = 'lazy';
-        img.decoding = 'async';
+        img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+        if (img.complete) img.classList.add('loaded');
         item.appendChild(img);
         const itemData = {
           element: item,
