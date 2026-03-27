@@ -55,6 +55,11 @@ body.zoom-mode .footer > * {
   pointer-events: none;
 }
 
+body.zoom-mode #activeCategoryLabel {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .preloader-overlay {
   background: #000;
 }
