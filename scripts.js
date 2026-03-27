@@ -565,6 +565,10 @@ class FashionGallery {
       return `#${r}${g}${b}`;
     };
     const animate = () => {
+      if (document.hidden) {
+        this._soundWaveRafId = null;
+        return;
+      }
       const targetAmplitude = this.soundSystem.enabled ? 1 : 0;
       currentAmplitude += (targetAmplitude - currentAmplitude) * 0.08;
       ctx.clearRect(0, 0, width, height);
@@ -596,8 +600,13 @@ class FashionGallery {
           ctx.fillRect(i, Math.round(y), 1, 2);
         }
       }
-      requestAnimationFrame(animate);
+      this._soundWaveRafId = requestAnimationFrame(animate);
     };
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !this._soundWaveRafId) {
+        animate();
+      }
+    });
     animate();
   }
   /** Collect all image paths from GALLERY_CATEGORIES into this.fashionImages. */
@@ -1403,12 +1412,10 @@ class FashionGallery {
       }
       if (newZoom === oldTargetZoom) return;
 
-      // Read current rendered position for cursor-anchored zoom
-      const style = getComputedStyle(this.canvasWrapper);
-      const matrix = new DOMMatrix(style.transform);
-      const currentX = matrix.m41;
-      const currentY = matrix.m42;
-      const currentScale = matrix.a;
+      // Read current animated position via GSAP (avoids forced reflow)
+      const currentX = gsap.getProperty(this.canvasWrapper, 'x');
+      const currentY = gsap.getProperty(this.canvasWrapper, 'y');
+      const currentScale = gsap.getProperty(this.canvasWrapper, 'scaleX');
 
       // Zoom toward mouse cursor based on where canvas actually is right now
       const ratio = newZoom / currentScale;

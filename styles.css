@@ -1042,6 +1042,13 @@ h3 {
   animation: abGlitchB 7s infinite;
 }
 
+/* Pause glitch animations when panel is not visible */
+#indexPanelAbout:not(.active) .ab-h1,
+#indexPanelAbout:not(.active) .ab-h1::before,
+#indexPanelAbout:not(.active) .ab-h1::after {
+  animation-play-state: paused;
+}
+
 @keyframes abH1Glitch {
   0%, 85%, 100% { transform: none; }
   87%  { transform: translateX(-2px); }
@@ -1349,6 +1356,13 @@ h3 {
   color: rgba(100, 180, 255, 0.35);
   animation: ctGlitchBlue 6s infinite;
   clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
+}
+
+/* Pause glitch animations when panel is not visible */
+#indexPanelContact:not(.active) .ct-h1,
+#indexPanelContact:not(.active) .ct-h1::before,
+#indexPanelContact:not(.active) .ct-h1::after {
+  animation-play-state: paused;
 }
 
 @keyframes ctH1Glitch {
