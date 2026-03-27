@@ -258,21 +258,15 @@ class FashionGallery {
     this.soundSystem = {
       enabled: true,
       sounds: {
-        click: new Audio("https://assets.codepen.io/7558/glitch-fx-001.mp3"),
-        open: new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
-        close: new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
-        button: new Audio("sounds/BUTTON.WAV"),
-        liftoff: new Audio("sounds/liftoff.wav"),
-        land: new Audio("sounds/land.wav"),
-        "zoom-in": new Audio(
-          "https://assets.codepen.io/7558/whoosh-fx-001.mp3"
-        ),
-        "zoom-out": new Audio(
-          "https://assets.codepen.io/7558/whoosh-fx-001.mp3"
-        ),
-        "drag-start": new Audio(
-          "https://assets.codepen.io/7558/preloader-2s-001.mp3"
-        )
+        click:        new Audio("https://assets.codepen.io/7558/glitch-fx-001.mp3"),
+        open:         new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
+        close:        new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
+        button:       new Audio("sounds/BUTTON.WAV"),
+        liftoff:      new Audio("sounds/liftoff.wav"),
+        land:         new Audio("sounds/land.wav"),
+        "zoom-in":    new Audio("https://assets.codepen.io/7558/whoosh-fx-001.mp3"),
+        "zoom-out":   new Audio("https://assets.codepen.io/7558/whoosh-fx-001.mp3"),
+        "drag-start": new Audio("https://assets.codepen.io/7558/preloader-2s-001.mp3")
       },
       _lastPlayTime: {},
       _debounceMs: {
@@ -511,21 +505,17 @@ class FashionGallery {
         }
       },
       play: (soundName) => {
-        if (!this.soundSystem.enabled || !this.soundSystem.sounds[soundName])
-          return;
+        if (!this.soundSystem.enabled || !this.soundSystem.sounds[soundName]) return;
         const now = Date.now();
         const cooldown = this.soundSystem._debounceMs[soundName] || 200;
-        const lastTime = this.soundSystem._lastPlayTime[soundName] || 0;
-        if (now - lastTime < cooldown) return;
+        if (now - (this.soundSystem._lastPlayTime[soundName] || 0) < cooldown) return;
         this.soundSystem._lastPlayTime[soundName] = now;
         try {
           const audio = this.soundSystem.sounds[soundName];
           audio.pause();
           audio.currentTime = 0;
           audio.play().catch(() => {});
-        } catch (e) {
-          // Silently handle audio errors
-        }
+        } catch (_) {}
       },
       toggle: () => {
         this.soundSystem.enabled = !this.soundSystem.enabled;
@@ -537,8 +527,8 @@ class FashionGallery {
         }
       }
     };
-    // Preload sounds
-    Object.values(this.soundSystem.sounds).forEach((audio) => {
+    // Preload all sounds
+    Object.values(this.soundSystem.sounds).forEach(audio => {
       audio.preload = "auto";
       audio.volume = 0.3;
     });
