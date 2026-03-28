@@ -915,6 +915,17 @@ class FashionGallery {
     const currentVisualRect = overlay.getBoundingClientRect();
     const thumbRect = selectedElement.getBoundingClientRect();
 
+    // Compute the contained image rect within the cell (mirrors enterZoomMode srcW/srcH calc).
+    // Using the raw thumbRect would distort images whose aspect ratio differs from the cell's.
+    const natW = selectedImg.naturalWidth  || thumbRect.width;
+    const natH = selectedImg.naturalHeight || thumbRect.height;
+    const imgAspect = natW / natH;
+    const cellAspect = thumbRect.width / thumbRect.height;
+    const srcW = imgAspect > cellAspect ? thumbRect.width  : thumbRect.height * imgAspect;
+    const srcH = imgAspect > cellAspect ? thumbRect.width  / imgAspect : thumbRect.height;
+    const srcL = thumbRect.left + (thumbRect.width  - srcW) / 2;
+    const srcT = thumbRect.top  + (thumbRect.height - srcH) / 2;
+
     // Clear transforms to read the overlay's base layout position
     gsap.set(overlay, { clearProps: "x,y,scaleX,scaleY,scale" });
     const baseRect = overlay.getBoundingClientRect();
@@ -930,10 +941,10 @@ class FashionGallery {
 
     // Animate transforms to thumbnail position — no layout thrashing
     gsap.to(overlay, {
-      x: thumbRect.left - baseRect.left,
-      y: thumbRect.top - baseRect.top,
-      scaleX: thumbRect.width / baseRect.width,
-      scaleY: thumbRect.height / baseRect.height,
+      x: srcL - baseRect.left,
+      y: srcT - baseRect.top,
+      scaleX: srcW / baseRect.width,
+      scaleY: srcH / baseRect.height,
       duration: 1.2,
       ease: this.customEase,
       onComplete: () => {
