@@ -385,9 +385,6 @@ h3 {
   transition: opacity 0.5s ease;
   border-radius: 12px;
   overflow: hidden;
-  contain: layout style paint;
-  content-visibility: auto;
-  contain-intrinsic-size: 400px 300px;
 }
 
 .grid-item.out-of-view {
@@ -1978,7 +1975,6 @@ h3 {
   /* Grid items on mobile */
   .grid-item {
     cursor: default;
-    contain-intrinsic-size: 260px 195px;
   }
 
   /* Ensure body allows touch on canvas */
