@@ -737,8 +737,8 @@ h3 {
   grid-template-rows: 1fr auto;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .category-index-close {

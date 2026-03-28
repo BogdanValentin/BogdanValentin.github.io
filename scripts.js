@@ -1052,11 +1052,11 @@ class FashionGallery {
 
           img.src = thumbSrc;
           gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' });
-          // Upgrade to full-res in background
+          // Upgrade to full-res in background; decode() off main thread before swapping in
           const pre = new Image();
           this._navPreload = pre;
-          pre.onload = () => { if (this._navToken === token) img.src = fullSrc; };
           pre.src = fullSrc;
+          pre.decode().then(() => { if (this._navToken === token) img.src = fullSrc; }).catch(() => {});
         };
 
         thumbPre.onload  = show;
