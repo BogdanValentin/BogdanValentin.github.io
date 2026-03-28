@@ -2150,10 +2150,6 @@ initDraggable() {
     }
     this.soundToggle.addEventListener("click", () => this.soundSystem.toggle());
     // Category index triggers
-    const indexTrigger = document.getElementById('indexTrigger');
-    if (indexTrigger) indexTrigger.addEventListener('click', () => {
-      if (this.indexOpen) this.closeCategoryIndex(); else this.openCategoryIndex();
-    });
     const catLabel = document.getElementById('activeCategoryLabel');
     if (catLabel) catLabel.addEventListener('click', () => this.openCategoryIndex());
     const catClose = document.getElementById('categoryIndexClose');
