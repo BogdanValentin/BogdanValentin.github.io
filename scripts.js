@@ -758,19 +758,13 @@ class FashionGallery {
     const overlay = document.createElement("div");
     overlay.className = "scaling-image-overlay";
     const img = document.createElement("img");
-    // Show thumbnail immediately, then swap to full once loaded
     img.src = sourceImg.src;
     img.alt = sourceImg.alt;
     overlay.appendChild(img);
     document.body.appendChild(overlay);
-    const sourceRect = sourceImg.getBoundingClientRect();
-    gsap.set(overlay, {
-      left: sourceRect.left,
-      top: sourceRect.top,
-      width: sourceRect.width,
-      height: sourceRect.height,
-      opacity: 1
-    });
+    // Positioning is handled entirely by enterZoomMode — don't set it here
+    // to avoid GSAP cache conflicts on sequential gsap.set calls.
+    gsap.set(overlay, { opacity: 1 });
     // Load full-size in background and swap when ready
     const fullSrc = this.toFullPath(sourceImg.src);
     const pre = new Image();
@@ -798,26 +792,47 @@ class FashionGallery {
     this.zoomState.scalingOverlay = this.createScalingOverlay(
       selectedItemData.img
     );
+    this._preloadAdjacent(selectedItemData.index);
     gsap.set(selectedItemData.img, {
       opacity: 0
     });
 
     // Animate overlay from thumbnail position to zoom target using transforms (GPU-composited, no reflow)
     const overlay = this.zoomState.scalingOverlay;
-    const sourceRect = selectedItemData.img.getBoundingClientRect();
+    const cellRect  = selectedItemData.img.getBoundingClientRect();
     const targetRect = zoomTarget.getBoundingClientRect();
 
-    // Set overlay to final size/position once (single layout), then use transforms to start at thumbnail
+    // Derive the image's aspect ratio from naturalWidth/naturalHeight (EXIF-corrected in modern browsers)
+    const natW = selectedItemData.img.naturalWidth  || cellRect.width;
+    const natH = selectedItemData.img.naturalHeight || cellRect.height;
+    const imgAspect = natW / natH;
+
+    // Contained image size within the zoom target — this is where the overlay will end up
+    const tgtAspect = targetRect.width / targetRect.height;
+    const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
+    const fh = imgAspect > tgtAspect ? targetRect.width  / imgAspect : targetRect.height;
+    const fl = targetRect.left + (targetRect.width  - fw) / 2;
+    const ft = targetRect.top  + (targetRect.height - fh) / 2;
+
+    // Contained image size within the grid cell — this is the actual rendered area to start from.
+    // Using the full cellRect would distort portrait images (landscape cell ≠ portrait image rect).
+    const cellAspect = cellRect.width / cellRect.height;
+    const srcW = imgAspect > cellAspect ? cellRect.width  : cellRect.height * imgAspect;
+    const srcH = imgAspect > cellAspect ? cellRect.width  / imgAspect : cellRect.height;
+    const srcL = cellRect.left + (cellRect.width  - srcW) / 2;
+    const srcT = cellRect.top  + (cellRect.height - srcH) / 2;
+
+    // Set overlay to final size/position, use transforms to start from the source image content rect
     gsap.set(overlay, {
-      left: targetRect.left,
-      top: targetRect.top,
-      width: targetRect.width,
-      height: targetRect.height,
+      left: fl,
+      top: ft,
+      width: fw,
+      height: fh,
       transformOrigin: "top left",
-      x: sourceRect.left - targetRect.left,
-      y: sourceRect.top - targetRect.top,
-      scaleX: sourceRect.width / targetRect.width,
-      scaleY: sourceRect.height / targetRect.height,
+      x: srcL - fl,
+      y: srcT - ft,
+      scaleX: srcW / fw,
+      scaleY: srcH / fh,
     });
 
     // Animate only transforms — no layout thrashing
@@ -953,6 +968,17 @@ class FashionGallery {
       this.navigateZoom(-1);
     }
   }
+  _preloadAdjacent(centerIndex) {
+    const total = this.gridItems.length;
+    if (this._adjacentPreloads) {
+      this._adjacentPreloads.forEach(img => { img.src = ''; });
+    }
+    this._adjacentPreloads = [-1, 1, 2].map(offset => {
+      const img = new Image();
+      img.src = this.toFullPath(this.gridItems[(centerIndex + offset + total) % total].imageUrl);
+      return img;
+    });
+  }
   navigateZoom(direction) {
     if (!this.zoomState.isActive || !this.zoomState.selectedItem) return;
     this.soundSystem.playSynth('navClick');
@@ -970,6 +996,7 @@ class FashionGallery {
     const totalItems = this.gridItems.length;
     const newIndex = (prevItem.index + direction + totalItems) % totalItems;
     const newItemData = this.gridItems[newIndex];
+    this._preloadAdjacent(newIndex);
 
     gsap.set(prevItem.img, { opacity: 1 });
     gsap.set(newItemData.img, { opacity: 0 });
@@ -996,6 +1023,22 @@ class FashionGallery {
 
         const show = () => {
           if (this._navToken !== token) return;
+
+          // Resize overlay to match new image's contained area while it's invisible.
+          // Without this, a portrait image keeps the previous landscape overlay and the
+          // border frames empty space.
+          const zoomTarget = document.getElementById('zoomTarget');
+          const targetRect  = zoomTarget.getBoundingClientRect();
+          const natW = thumbPre.naturalWidth  || targetRect.width;
+          const natH = thumbPre.naturalHeight || targetRect.height;
+          const imgAspect = natW / natH;
+          const tgtAspect = targetRect.width / targetRect.height;
+          const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
+          const fh = imgAspect > tgtAspect ? targetRect.width  / imgAspect : targetRect.height;
+          const fl = targetRect.left + (targetRect.width  - fw) / 2;
+          const ft = targetRect.top  + (targetRect.height - fh) / 2;
+          gsap.set(overlay, { left: fl, top: ft, width: fw, height: fh, x: 0, y: 0 });
+
           img.src = thumbSrc;
           gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' });
           // Upgrade to full-res in background

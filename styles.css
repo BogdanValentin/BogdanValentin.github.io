@@ -626,12 +626,12 @@ h3 {
   top: 0;
   left: 0;
   z-index: 3;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(var(--accent-rgb), 0.7);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4), 0 0 48px rgba(var(--accent-rgb), 0.2), 0 0 80px rgba(var(--accent-rgb), 0.1), inset 0 0 12px rgba(var(--accent-rgb), 0.08);
   pointer-events: none;
   will-change: transform, opacity;
-  overflow: visible;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .scaling-image-overlay img {
@@ -639,9 +639,6 @@ h3 {
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 12px;
-  border: 2px solid rgba(var(--accent-rgb), 0.7);
-  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4), 0 0 48px rgba(var(--accent-rgb), 0.2), 0 0 80px rgba(var(--accent-rgb), 0.1), inset 0 0 12px rgba(var(--accent-rgb), 0.08);
 }
 
 /* ===== IMAGE NAVIGATION BUTTONS ===== */
