@@ -841,7 +841,7 @@ class FashionGallery {
       y: 0,
       scaleX: 1,
       scaleY: 1,
-      duration: 1.2,
+      duration: 0.4,
       ease: this.customEase,
       onComplete: () => {
       }
@@ -850,8 +850,8 @@ class FashionGallery {
     // Show nav buttons
     this.navPrev.classList.add("active");
     this.navNext.classList.add("active");
-    gsap.fromTo(this.navPrev, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 1.0 });
-    gsap.fromTo(this.navNext, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 1.05 });
+    gsap.fromTo(this.navPrev, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power2.out", delay: 0.35 });
+    gsap.fromTo(this.navNext, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power2.out", delay: 0.38 });
     // Wire nav button clicks
     this.navPrev.onclick = () => this.navigateZoom(-1);
     this.navNext.onclick = () => this.navigateZoom(1);
@@ -945,7 +945,7 @@ class FashionGallery {
       y: srcT - baseRect.top,
       scaleX: srcW / baseRect.width,
       scaleY: srcH / baseRect.height,
-      duration: 1.2,
+      duration: 0.4,
       ease: this.customEase,
       onComplete: () => {
         gsap.set(selectedImg, {
