@@ -191,6 +191,7 @@ class FashionGallery {
     this.navNext = document.getElementById("navNext");
     this.controlsContainer = document.getElementById("controlsContainer");
     this.soundToggle = document.getElementById("soundToggle");
+    this.vmBtns = [0, 1, 2].map(i => document.getElementById(`vmBtn${i}`));
     // Create custom eases
     this.customEase = CustomEase.create("smooth", ".87,0,.13,1");
     this.centerEase = CustomEase.create("center", ".25,.46,.45,.94");
@@ -210,10 +211,12 @@ class FashionGallery {
     // State
     this.zoomState = {
       isActive: false,
+      isFullscreen: false,
       selectedItem: null,
       flipAnimation: null,
       scalingOverlay: null
     };
+    this.viewMode = 0; // 0=split, 1=css-fullscreen, 2=native-fullscreen
     this.gridItems = [];
     this.gridDimensions = {};
     this.lastValidPosition = {
@@ -229,6 +232,14 @@ class FashionGallery {
     // Bound event handler references (so removeEventListener works)
     this._boundHandleSplitAreaClick = this.handleSplitAreaClick.bind(this);
     this._boundHandleZoomKeys = this.handleZoomKeys.bind(this);
+    this._boundHandleFullscreenChange = this.handleFullscreenChange.bind(this);
+    document.addEventListener("fullscreenchange", this._boundHandleFullscreenChange);
+    // View mode picker buttons
+    this.vmGroup = document.getElementById('vmGroup');
+    this.vmGroup.style.setProperty('--vm-active', 0);
+    this.vmBtns.forEach((btn, i) => {
+      btn.onclick = () => this._setViewMode(i);
+    });
     // Initialize sound system
     this.initSoundSystem();
     // Initialize image data
@@ -782,12 +793,23 @@ class FashionGallery {
     document.body.classList.add("zoom-mode");
     const splitContainer = this.splitScreenContainer;
     const zoomTarget = document.getElementById("zoomTarget");
-    splitContainer.classList.add("active");
-    gsap.to(splitContainer, {
-      opacity: 1,
-      duration: 1.2,
-      ease: this.customEase
-    });
+    if (this.viewMode > 0) {
+      // Apply fullscreen layout before reading rects — backdrop appears instantly, no split-screen flash
+      this.zoomState.isFullscreen = true;
+      document.body.classList.add("fullscreen-mode");
+      splitContainer.classList.add("active");
+      gsap.set(splitContainer, { opacity: 1 });
+      if (this.viewMode === 2) {
+        // Fire native fullscreen in parallel; if viewport changes on resolve,
+        // _repositionOverlayToTarget kills the in-progress tween and corrects to the new target
+        document.documentElement.requestFullscreen()
+          .then(() => this._repositionOverlayToTarget())
+          .catch(() => {});
+      }
+    } else {
+      splitContainer.classList.add("active");
+      gsap.to(splitContainer, { opacity: 1, duration: 0.4, ease: "expo.out" });
+    }
 
     this.zoomState.scalingOverlay = this.createScalingOverlay(
       selectedItemData.img
@@ -842,7 +864,7 @@ class FashionGallery {
       scaleX: 1,
       scaleY: 1,
       duration: 0.4,
-      ease: this.customEase,
+      ease: "expo.out",
       onComplete: () => {
       }
     });
@@ -868,6 +890,7 @@ class FashionGallery {
     // Close when tapping empty space around the image, but not on
     // interactive elements (close button, nav buttons, title overlay)
     if (e.target.closest(".image-nav-btn")) return;
+    if (e.target.closest(".fullscreen-btn")) return;
     this.exitZoomMode();
   }
   exitZoomMode() {
@@ -903,6 +926,10 @@ class FashionGallery {
     gsap.to(this.navNext, { opacity: 0, y: 15, duration: 0.3, ease: "power2.in" });
     this.navPrev.onclick = null;
     this.navNext.onclick = null;
+    // Track and clear fullscreen flag now, but keep the class until onComplete
+    // so the layout stays in fullscreen-mode during the close animation (prevents ghost)
+    const wasFullscreen = this.zoomState.isFullscreen;
+    this.zoomState.isFullscreen = false;
     splitContainer.classList.remove("active");
     this.controlsContainer.classList.remove("split-mode");
     gsap.to(splitContainer, {
@@ -946,7 +973,7 @@ class FashionGallery {
       scaleX: srcW / baseRect.width,
       scaleY: srcH / baseRect.height,
       duration: 0.4,
-      ease: this.customEase,
+      ease: "expo.in",
       onComplete: () => {
         gsap.set(selectedImg, {
           opacity: 1
@@ -957,6 +984,14 @@ class FashionGallery {
         }
         splitContainer.classList.remove("active");
         document.body.classList.remove("zoom-mode");
+        if (wasFullscreen) {
+          document.body.classList.remove("fullscreen-mode");
+          // Only exit native fullscreen if not in native-fullscreen mode (viewMode 2)
+          // so closing an image while in F11 keeps F11 active
+          if (document.fullscreenElement && this.viewMode !== 2) {
+            document.exitFullscreen().catch(() => {});
+          }
+        }
         if (this.draggable) this.draggable.enable();
         // Reset split-mode states
         const splitRight = document.getElementById('splitRight');
@@ -970,7 +1005,11 @@ class FashionGallery {
   handleZoomKeys(e) {
     if (!this.zoomState.isActive) return;
     if (e.key === "Escape") {
-      this.exitZoomMode();
+      if (this.zoomState.isFullscreen) {
+        this.exitFullscreen();
+      } else {
+        this.exitZoomMode();
+      }
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
       this.navigateZoom(1);
@@ -978,6 +1017,109 @@ class FashionGallery {
       e.preventDefault();
       this.navigateZoom(-1);
     }
+  }
+  _setViewMode(mode) {
+    const prev = this.viewMode;
+    this.viewMode = mode;
+    this.vmGroup.style.setProperty('--vm-active', mode);
+    this.vmBtns.forEach((btn, i) => btn.classList.toggle('vm-active', i === mode));
+    // Exit native fullscreen when switching away from mode 2, regardless of zoom state
+    if (mode !== 2 && mode !== prev && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    if (!this.zoomState.isActive) return;
+    if (mode === prev) return;
+    if (mode === 0) {
+      this.exitFullscreen();
+    } else if (mode === 1) {
+      if (!this.zoomState.isFullscreen) {
+        this.enterFullscreen(false);
+      } else if (document.fullscreenElement) {
+        // Downgrade: exit native but keep CSS fullscreen
+        document.exitFullscreen().catch(() => {});
+        // handleFullscreenChange will reposition
+      }
+    } else if (mode === 2) {
+      if (!this.zoomState.isFullscreen) {
+        this.enterFullscreen(true);
+      } else if (!document.fullscreenElement) {
+        // Upgrade: add native on top of CSS fullscreen
+        document.documentElement.requestFullscreen()
+          .then(() => this._repositionOverlayToTarget())
+          .catch(() => {});
+      }
+    }
+  }
+  enterFullscreen(useNative = true) {
+    this.zoomState.isFullscreen = true;
+    document.body.classList.add("fullscreen-mode");
+    this.soundSystem.play("click");
+    if (useNative) {
+      document.documentElement.requestFullscreen()
+        .then(() => this._repositionOverlayToTarget())
+        .catch(() => this._repositionOverlayToTarget());
+    } else {
+      this._repositionOverlayToTarget();
+    }
+  }
+  exitFullscreen() {
+    if (!this.zoomState.isFullscreen) return;
+    this.zoomState.isFullscreen = false;
+    document.body.classList.remove("fullscreen-mode");
+    this.soundSystem.play("click");
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+      // _repositionOverlayToTarget will be called by handleFullscreenChange
+    } else {
+      this._repositionOverlayToTarget();
+    }
+  }
+  handleFullscreenChange() {
+    if (!document.fullscreenElement && this.zoomState.isActive) {
+      if (this.viewMode === 2) {
+        // External native exit (Esc, F11, OS) — drop to CSS-only fullscreen
+        this.viewMode = 1;
+        this.vmGroup.style.setProperty('--vm-active', 1);
+        this.vmBtns.forEach((btn, i) => btn.classList.toggle('vm-active', i === 1));
+        // Keep fullscreen-mode class — still CSS fullscreen
+      }
+      this._repositionOverlayToTarget();
+    }
+  }
+  _repositionOverlayToTarget() {
+    const overlay = this.zoomState.scalingOverlay;
+    if (!overlay) return;
+    gsap.killTweensOf(overlay);
+    const currentVisualRect = overlay.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      const zoomTarget = document.getElementById('zoomTarget');
+      const targetRect = zoomTarget.getBoundingClientRect();
+      const img = overlay.querySelector('img');
+      const natW = img.naturalWidth || targetRect.width;
+      const natH = img.naturalHeight || targetRect.height;
+      const imgAspect = natW / natH;
+      const tgtAspect = targetRect.width / targetRect.height;
+      const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
+      const fh = imgAspect > tgtAspect ? targetRect.width / imgAspect : targetRect.height;
+      const fl = targetRect.left + (targetRect.width  - fw) / 2;
+      const ft = targetRect.top  + (targetRect.height - fh) / 2;
+      gsap.set(overlay, {
+        left: fl,
+        top: ft,
+        width: fw,
+        height: fh,
+        transformOrigin: 'top left',
+        x: currentVisualRect.left - fl,
+        y: currentVisualRect.top - ft,
+        scaleX: currentVisualRect.width / fw,
+        scaleY: currentVisualRect.height / fh,
+      });
+      gsap.to(overlay, {
+        x: 0, y: 0, scaleX: 1, scaleY: 1,
+        duration: 0.4,
+        ease: 'expo.out',
+      });
+    });
   }
   _preloadAdjacent(centerIndex) {
     const total = this.gridItems.length;
