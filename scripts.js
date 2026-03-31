@@ -226,6 +226,7 @@ class FashionGallery {
     this.draggable = null;
     this._isDragging = false;
     this._isAnimating = false;
+    this._pinchJustEnded = false;
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
@@ -709,7 +710,7 @@ class FashionGallery {
         };
         // Click/tap to zoom — drag detection uses gallery-level isDragging flag
         item.addEventListener("click", () => {
-          if (this._isDragging || this.zoomState.isActive) return;
+          if (this._isDragging || this._pinchJustEnded || this.zoomState.isActive) return;
           this.soundSystem.play("click");
           this.enterZoomMode(itemData);
         });
@@ -1747,6 +1748,9 @@ class FashionGallery {
     this.viewport.addEventListener('touchend', (e) => {
       if (e.touches.length < 2 && startDist > 0) {
         startDist = 0;
+        // Suppress the synthetic click the browser fires after a pinch gesture
+        this._pinchJustEnded = true;
+        setTimeout(() => { this._pinchJustEnded = false; }, 400);
         // Finalize: update gap + draggable bounds
         this.finalizeScrollZoom(this.config.currentZoom);
         this.updateZoomButtonHighlight(this.config.currentZoom);
@@ -1828,7 +1832,7 @@ initDraggable() {
     onClick: (e) => {
       // GSAP fires onClick only when it was NOT a drag — reliable on mobile
       const item = e.target.closest(".grid-item");
-      if (!item || this.zoomState.isActive) return;
+      if (!item || this._pinchJustEnded || this.zoomState.isActive) return;
       const itemData = this.gridItems.find(d => d.element === item);
       if (itemData) {
         this.soundSystem.play("click");
