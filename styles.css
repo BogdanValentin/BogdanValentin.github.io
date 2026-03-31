@@ -624,7 +624,7 @@ h3 {
 
 
 /* ===== FULLSCREEN MODE OVERRIDES ===== */
-body.fullscreen-mode .split-left  { width: 100vw; padding-left: 4.5rem; padding-right: 4.5rem; padding-bottom: 4.5rem; }
+body.fullscreen-mode .split-left  { width: 100vw; padding-bottom: 4.5rem; }
 body.fullscreen-mode .split-right { display: none; }
 body.fullscreen-mode .image-nav-prev { left: 1.25rem; }
 body.fullscreen-mode .image-nav-next { left: auto; right: 1.25rem; }
