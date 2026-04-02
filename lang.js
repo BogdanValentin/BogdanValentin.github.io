@@ -42,7 +42,13 @@ const TRANSLATIONS = {
 
     ctSectorName: "Bucharest\u00a0·\u00a0Romania",
     ctTransmission: "END_TRANSMISSION",
-    footerCity: "2026 \u2022 Bucharest"
+    footerCity: "2026 \u2022 Bucharest",
+
+    tooltipSplitView: "Split view",
+    tooltipTheatreMode: "Theatre mode",
+    tooltipFullscreen: "Fullscreen",
+    tooltipSoundOn: "Sound on",
+    tooltipSoundOff: "Sound off"
   },
   ro: {
     allWork: "Categorii",
@@ -82,7 +88,13 @@ const TRANSLATIONS = {
 
     ctSectorName: "Bucuresti\u00a0·\u00a0Romania",
     ctTransmission: "SFARSIT_TRANSMISIE",
-    footerCity: "2026 \u2022 Bucuresti"
+    footerCity: "2026 \u2022 Bucuresti",
+
+    tooltipSplitView: "Mod split",
+    tooltipTheatreMode: "Mod teatru",
+    tooltipFullscreen: "Ecran complet",
+    tooltipSoundOn: "Sunet pornit",
+    tooltipSoundOff: "Sunet oprit"
   }
 };
 
@@ -134,6 +146,21 @@ function glitchReveal(elements, getNewText, onDone) {
 
   tick();
 }
+
+function updateTooltips() {
+  var vmKeys = ['tooltipSplitView', 'tooltipTheatreMode', 'tooltipFullscreen'];
+  [0, 1, 2].forEach(function(i) {
+    var btn = document.getElementById('vmBtn' + i);
+    if (btn) btn.setAttribute('aria-label', window.t(vmKeys[i]));
+  });
+  var sound = document.getElementById('soundToggle');
+  if (sound) {
+    var key = sound.classList.contains('active') ? 'tooltipSoundOn' : 'tooltipSoundOff';
+    sound.setAttribute('data-tooltip', window.t(key));
+  }
+}
+
+window.updateTooltips = updateTooltips;
 
 function updateButton() {
   var flag = window.currentLang === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDF4';
@@ -205,6 +232,7 @@ function applyTranslations(animate) {
 
   document.documentElement.lang = window.currentLang;
   updateButton();
+  updateTooltips();
 }
 
 window.setLanguage = function(lang) {

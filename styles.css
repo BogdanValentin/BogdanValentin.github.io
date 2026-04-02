@@ -777,8 +777,7 @@ body.fullscreen-mode .controls-container { left: 50%; }
     content: attr(aria-label);
   }
 
-  .sound-toggle::after       { content: 'Sound off'; }
-  .sound-toggle.active::after { content: 'Sound on'; }
+  .sound-toggle::after { content: attr(data-tooltip); }
 
   .vm-btn:hover::after,
   .sound-toggle:hover::after {
@@ -1914,16 +1913,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
-  /* Header: show only logo and collapse nav */
-  .header {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 1rem;
-    gap: 0;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
   .header {
     display: none;
   }
@@ -2126,17 +2115,9 @@ body.fullscreen-mode .controls-container { left: 50%; }
     padding: 4rem 0 1.5rem;
   }
 
-  .category-row {
-    padding: 0.85rem 0 0.85rem 1rem;
-  }
-
   .category-row:hover,
   .category-row.category-row-active {
     padding-left: 1.6rem;
-  }
-
-  .category-name {
-    font-size: 1.4rem;
   }
 
   .category-preview {
@@ -2176,11 +2157,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
   .index-panel-content {
     max-width: 100%;
-  }
-
-  .contact-link-big {
-    font-size: 1rem;
-    word-break: break-all;
   }
 
   .panel-scroll {

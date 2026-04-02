@@ -532,6 +532,7 @@ class FashionGallery {
       toggle: () => {
         this.soundSystem.enabled = !this.soundSystem.enabled;
         this.soundToggle.classList.toggle("active", this.soundSystem.enabled);
+        if (window.updateTooltips) window.updateTooltips();
         // Prevent visual conflicts during sound toggle
         if (this.zoomState.isActive) return;
         if (this.soundSystem.enabled) {
@@ -546,6 +547,7 @@ class FashionGallery {
     });
     // Set initial active state on the toggle button
     this.soundToggle.classList.add("active");
+    if (window.updateTooltips) window.updateTooltips();
     // Initialize sound wave canvas animation
     this.initSoundWave();
   }
