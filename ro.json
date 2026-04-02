@@ -1,0 +1,40 @@
+{
+  "allWork": "Toate Lucrarile",
+  "gallery": "Galerie",
+  "about": "Despre",
+  "contact": "Contact",
+  "throttleUp": "Inapoi sus",
+
+  "aboutHeading": "Despre",
+  "aboutLine1": "backend developer,",
+  "aboutLine2": "fotograf,",
+  "aboutLine3": "Bucuresti.",
+  "fileTitle1": "Profesional",
+  "file1Body": "Lucrez ca backend developer. Student la facultatea de Automatica din cadrul UPB Bucuresti. Fost elev la Liceul Teoretic \"Mihai Eminescu\" Calarasi. Mi-au placut calculatoarele inca de mic, de unde si tata a fost un geek si am avut PC acasa de cand m-am nascut. Lucrez la proiecte personale in timpul liber: site-ul asta, doua moduri de Minecraft, un music player, o clona wordle, licenta mea (scan & pay) etc.",
+  "fileTitle2": "Fotografie",
+  "file2Body": "Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) si un Sony A7 III (16-55mm f/2.8). In special fotografiez animale (iubesc pisicile \uD83D\uDC31), peisaje, astronomie, portrete, arhitectura, avioane.",
+  "fileTitle3": "Altele",
+  "file3Body": "Ca pasiuni, in timpul liber imi place sa joc jocuri video (Minecraft, Rimworld, Stardew Valley etc.), sa fiu activ: alergat, bicicleta, bouldering, inot si ador sa ma plimb de nebun. Ascult cam orice gen muzical, dar prefer muzica electronica.",
+  "archiveTitle": "Versiunea anterioara",
+  "archiveDesc": "Prima versiune, pe vremea cand nu existau LLM-uri.",
+  "archiveLink": "Viziteaza \u2197",
+
+  "contactHeading": "Contact",
+  "ctIntro": "Daca vrei sa luam legatura ma gasesti mai jos:",
+
+  "cat_animals": "Animale",
+  "cat_architecture": "Arhitectura",
+  "cat_portraits": "Portrete",
+  "cat_sport": "Sport",
+  "cat_landscapes": "Peisaje",
+  "cat_astronomy": "Astronomie",
+  "cat_flowers": "Flori",
+  "cat_events": "Evenimente",
+  "cat_art": "Arta",
+  "cat_autoportret": "Autoportrete",
+  "cat_vehicles": "Vehicule",
+
+  "ctSectorName": "Bucuresti\u00a0·\u00a0Romania",
+  "ctTransmission": "SFARSIT_TRANSMISIE",
+  "footerCity": "2026 \u2022 Bucuresti"
+}

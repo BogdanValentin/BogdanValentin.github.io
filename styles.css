@@ -86,7 +86,7 @@ body.zoom-mode #activeCategoryLabel {
 
 .footer {
   bottom: 0;
-  padding-bottom: 4.5em;
+  padding-bottom: 1.25em;
 }
 
 /* Grid column assignments */
@@ -100,6 +100,30 @@ body.zoom-mode #activeCategoryLabel {
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0.4em;
   padding: 0.35em 0.65em;
+}
+
+/* ===== LANGUAGE TOGGLE ===== */
+.lang-toggle {
+  grid-column: 1 / span 1;
+  align-self: start;
+  justify-self: start;
+  font-family: 'TheGoodMonolith', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.4em;
+  color: var(--color-text);
+  padding: 0.35em 0.75em;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  pointer-events: auto;
+}
+.lang-toggle:hover {
+  border-color: var(--color-text);
 }
 
 /* ===== HAMBURGER BUTTON (mobile only) ===== */
@@ -1838,6 +1862,15 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
   .header {
     display: none;
+  }
+
+  .lang-toggle {
+    display: block;
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 10002;
+    background: rgba(0, 0, 0, 0.6);
   }
 
   .hamburger-btn {

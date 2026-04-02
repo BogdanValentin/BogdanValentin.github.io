@@ -15,6 +15,7 @@
 
 <!-- Header Navigation -->
 <header class="header">
+  <button class="lang-toggle" id="langToggle" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
   <div class="values-section">
     <h3 class="active-category-indicator" id="activeCategoryLabel">All Work</h3>
   </div>
@@ -30,9 +31,9 @@
 <div class="mobile-menu-overlay" id="mobileMenuOverlay">
   <div class="mobile-menu-content">
     <nav class="mobile-menu-nav">
-      <a href="index.html" class="mobile-menu-link">Gallery</a>
-      <a href="#" class="mobile-menu-link" data-panel="about">About</a>
-      <a href="#" class="mobile-menu-link" data-panel="contact">Contact</a>
+      <a href="index.html" class="mobile-menu-link" data-i18n="gallery">Gallery</a>
+      <a href="#" class="mobile-menu-link" data-panel="about" data-i18n="about">About</a>
+      <a href="#" class="mobile-menu-link" data-panel="contact" data-i18n="contact">Contact</a>
     </nav>
   </div>
 </div>
@@ -57,7 +58,7 @@
     <div class="index-panel" id="indexPanelAbout">
       <article class="index-panel-content">
 
-        <h1 class="ab-h1" data-text="About">About</h1>
+        <h1 class="ab-h1" data-text="About" data-i18n="aboutHeading">About</h1>
 
         <!-- DOSSIER BLOCK -->
         <div class="ab-dossier">
@@ -67,7 +68,7 @@
           </div>
 
           <div class="about-intro">
-            <p class="lead"><span class="about-name">Craia Bogdan-Valentin</span><br><br>backend developer,<br>fotograf,<br>Bucuresti.</p>
+            <p class="lead"><span class="about-name">Craia Bogdan-Valentin</span><br><br><span data-i18n="aboutLine1">backend developer,</span><br><span data-i18n="aboutLine2">fotograf,</span><br><span data-i18n="aboutLine3">Bucuresti.</span></p>
           </div>
 
         </div>
@@ -76,19 +77,19 @@
         <div class="ab-file">
           <div class="ab-file-header">
             <span class="ab-file-id">FILE_01</span>
-            <span class="ab-file-title">Profesional</span>
+            <span class="ab-file-title" data-i18n="fileTitle1">Profesional</span>
             <div class="ab-file-line"></div>
           </div>
-          <p class="ab-body">Lucrez ca backend developer. Student la facultatea de Automatica din cadrul UPB Bucuresti. Fost elev la Liceul Teoretic "Mihai Eminescu" Calarasi. Mi-au placut calculatoarele inca de mic, de unde si tata a fost un geek si am avut PC acasa de cand m-am nascut. Lucrez la proiecte personale in timpul liber: site-ul asta, doua moduri de Minecraft, un music player, o clona wordle, licenta mea (scan & pay) etc.</p>
+          <p class="ab-body" data-i18n="file1Body">Lucrez ca backend developer. Student la facultatea de Automatica din cadrul UPB Bucuresti. Fost elev la Liceul Teoretic "Mihai Eminescu" Calarasi. Mi-au placut calculatoarele inca de mic, de unde si tata a fost un geek si am avut PC acasa de cand m-am nascut. Lucrez la proiecte personale in timpul liber: site-ul asta, doua moduri de Minecraft, un music player, o clona wordle, licenta mea (scan & pay) etc.</p>
         </div>
 
         <div class="ab-file">
           <div class="ab-file-header">
             <span class="ab-file-id">FILE_02</span>
-            <span class="ab-file-title">Fotografie</span>
+            <span class="ab-file-title" data-i18n="fileTitle2">Fotografie</span>
             <div class="ab-file-line"></div>
           </div>
-          <p class="ab-body">Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) si un Sony A7 III (16-55mm f/2.8). In special fotografiez animale (iubesc pisicile 🐱), peisaje, astronomie, portrete, arhitectura, avioane.</p>
+          <p class="ab-body" data-i18n="file2Body">Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) si un Sony A7 III (16-55mm f/2.8). In special fotografiez animale (iubesc pisicile 🐱), peisaje, astronomie, portrete, arhitectura, avioane.</p>
           <div class="ab-tags">
             <span class="ab-tag">Nikon D3400</span>
             <span class="ab-tag">Sony A7 III</span>
@@ -102,10 +103,10 @@
         <div class="ab-file">
           <div class="ab-file-header">
             <span class="ab-file-id">FILE_03</span>
-            <span class="ab-file-title">Altele</span>
+            <span class="ab-file-title" data-i18n="fileTitle3">Altele</span>
             <div class="ab-file-line"></div>
           </div>
-          <p class="ab-body">Ca pasiuni, in timpul liber imi place sa joc jocuri video (Minecraft, Rimworld, Stardew Valley etc.), sa fiu activ: alergat, bicicleta, bouldering, inot si ador sa ma plimb de nebun. Ascult cam orice gen muzical, dar prefer muzica electronica.</p>
+          <p class="ab-body" data-i18n="file3Body">Ca pasiuni, in timpul liber imi place sa joc jocuri video (Minecraft, Rimworld, Stardew Valley etc.), sa fiu activ: alergat, bicicleta, bouldering, inot si ador sa ma plimb de nebun. Ascult cam orice gen muzical, dar prefer muzica electronica.</p>
         </div>
 
         <p class="ab-sig">— Bogdan</p>
@@ -116,9 +117,9 @@
           <div class="arc-3-content">
             <img class="arc-thumb" src="Old%20website%20version/preview.png" alt="">
             <div class="arc-body">
-              <span class="arc-title">Versiunea anterioara</span>
-              <span class="arc-desc">Prima versiune, pe vremea cand nu existau LLM-uri.</span>
-              <span class="arc-3-link">Viziteaza ↗</span>
+              <span class="arc-title" data-i18n="archiveTitle">Versiunea anterioara</span>
+              <span class="arc-desc" data-i18n="archiveDesc">Prima versiune, pe vremea cand nu existau LLM-uri.</span>
+              <span class="arc-3-link" data-i18n="archiveLink">Viziteaza ↗</span>
             </div>
           </div>
         </a>
@@ -129,7 +130,7 @@
     <!-- Inline Contact Panel -->
     <div class="index-panel" id="indexPanelContact">
       <article class="index-panel-content">
-        <h1 class="ct-h1" data-text="Contact">Contact</h1>
+        <h1 class="ct-h1" data-text="Contact" data-i18n="contactHeading">Contact</h1>
 
         <div class="ct-terminal">
 
@@ -138,7 +139,7 @@
             <span class="ct-status"><span class="ct-blink">▮</span>&nbsp;ONLINE</span>
           </div>
 
-          <p class="ct-intro">Daca vrei sa luam legatura ma gasesti mai jos:</p>
+          <p class="ct-intro" data-i18n="ctIntro">Daca vrei sa luam legatura ma gasesti mai jos:</p>
 
           <div class="ct-channels">
 
@@ -175,11 +176,11 @@
               <span class="ct-coord-sep">×</span>
               <span class="ct-coord">26.1062° E</span>
             </div>
-            <div class="ct-sector-name">Bucharest &nbsp;·&nbsp; Romania</div>
+            <div class="ct-sector-name" data-i18n="ctSectorName">Bucharest&nbsp;·&nbsp;Romania</div>
           </div>
 
           <div class="ct-footer-line">
-            <span>END_TRANSMISSION</span>
+            <span data-i18n="ctTransmission">END_TRANSMISSION</span>
             <span class="ct-blink-slow">_</span>
           </div>
 
@@ -199,14 +200,14 @@
         <div class="panel-rect"></div>
         <div class="panel-rect"></div>
       </div>
-      <span class="panel-scroll-text">Throttle up</span>
+      <span class="panel-scroll-text" data-i18n="throttleUp">Throttle up</span>
     </a>
   </div>
   <div class="category-index-footer">
     <div class="category-index-nav">
-      <a href="#" data-panel="about" id="navAbout">About</a>
+      <a href="#" data-panel="about" id="navAbout" data-i18n="about">About</a>
       <span class="category-index-sep">/</span>
-      <a href="#" data-panel="contact" id="navContact">Contact</a>
+      <a href="#" data-panel="contact" id="navContact" data-i18n="contact">Contact</a>
     </div>
     <p class="category-index-coords">44.4385° N, 26.0515° E</p>
   </div>
@@ -295,10 +296,14 @@
 <!-- Footer Navigation -->
 <footer class="footer">
   <div class="info-section">
-    <p>2026 • Bucharest</p>
+    <p data-i18n="footerCity">2026 • Bucharest</p>
     <p>44.4385° N, 26.0515° E</p>
   </div>
 </footer>
+
+  <!-- Language system (loads before defer gallery scripts so window.t() is available) -->
+  <script src="https://unpkg.com/baffle/dist/baffle.min.js"></script>
+  <script src="lang.js"></script>
 
   <!-- GSAP Dependencies - ADD THESE -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>

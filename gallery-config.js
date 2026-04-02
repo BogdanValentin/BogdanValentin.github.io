@@ -29,6 +29,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'animals',
     label: 'Animals',
+    labelRo: 'Animale',
     cover: 'photos/animals/1.jpg',
     images: [
       'photos/animals/1.jpg',
@@ -89,6 +90,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'architecture',
     label: 'Architecture',
+    labelRo: 'Arhitectura',
     cover: 'photos/architecture/1.jpg',
     images: [
       'photos/architecture/1.jpg',
@@ -132,6 +134,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'portraits',
     label: 'Portraits',
+    labelRo: 'Portrete',
     cover: 'photos/portraits/1.jpg',
     images: [
       'photos/portraits/1.jpg',
@@ -162,6 +165,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'sport',
     label: 'Sport',
+    labelRo: 'Sport',
     cover: 'photos/sport/1.jpg',
     images: [
       'photos/sport/1.jpg',
@@ -192,6 +196,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'landscapes',
     label: 'Landscapes',
+    labelRo: 'Peisaje',
     cover: 'photos/landscapes/1.jpg',
     images: [
       'photos/landscapes/1.jpg',
@@ -223,6 +228,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'astronomy',
     label: 'Astronomy',
+    labelRo: 'Astronomie',
     cover: 'photos/astronomy/1.jpg',
     images: [
       'photos/astronomy/1.jpg',
@@ -238,6 +244,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'flowers',
     label: 'Flowers',
+    labelRo: 'Flori',
     cover: 'photos/flowers/1.jpg',
     images: [
       'photos/flowers/1.jpg',
@@ -253,6 +260,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'events',
     label: 'Events',
+    labelRo: 'Evenimente',
     cover: 'photos/events/DSC04377.jpg',
     images: [
       'photos/events/DSC04377.jpg',
@@ -278,6 +286,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'art',
     label: 'Art',
+    labelRo: 'Arta',
     cover: 'photos/art/DSC_7492.jpg',
     images: [
       'photos/art/DSC_7492.jpg',
@@ -291,6 +300,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'autoportret',
     label: 'Autoportraits',
+    labelRo: 'Autoportrete',
     cover: 'photos/autoportret/1.jpg',
     images: [
       'photos/autoportret/1.jpg',
@@ -317,6 +327,7 @@ const GALLERY_CATEGORIES = [
   {
     id: 'vehicles',
     label: 'Vehicles',
+    labelRo: 'Vehicule',
     cover: 'photos/vehicles/1.jpg',
     images: [
       'photos/vehicles/1.jpg',

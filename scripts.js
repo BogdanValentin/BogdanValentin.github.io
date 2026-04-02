@@ -1278,7 +1278,7 @@ class FashionGallery {
     const totalPhotos = GALLERY_CATEGORIES.reduce((s, c) => s + c.images.length, 0);
     allRow.innerHTML = `
       <span class="category-number">✦</span>
-      <span class="category-name">✦ All Work</span>
+      <span class="category-name">✦ ${window.t ? window.t('allWork') : 'All Work'}</span>
 
       <span class="category-count">${totalPhotos > 0 ? totalPhotos : '—'}</span>
     `;
@@ -1293,11 +1293,12 @@ class FashionGallery {
       const num = String(i + 1).padStart(2, '0');
       row.innerHTML = `
         <span class="category-number">${num}</span>
-        <span class="category-name">${cat.label}</span>
-  
+        <span class="category-name">${window.currentLang === 'ro' && cat.labelRo ? cat.labelRo : cat.label}</span>
+
         <span class="category-count">${cat.images.length > 0 ? cat.images.length : '—'}</span>
       `;
-      row.addEventListener('mouseenter', () => { this.updateCategoryPreview(cat.id, cat.label); });
+      const catDisplayLabel = window.currentLang === 'ro' && cat.labelRo ? cat.labelRo : cat.label;
+      row.addEventListener('mouseenter', () => { this.updateCategoryPreview(cat.id, catDisplayLabel); });
       row.addEventListener('click', () => { this.switchCategory(cat.id); this.closeCategoryIndex(); });
       list.appendChild(row);
     });
@@ -1546,7 +1547,7 @@ class FashionGallery {
     const label = document.getElementById('activeCategoryLabel');
     if (label) {
       const cat = GALLERY_CATEGORIES.find(c => c.id === categoryId);
-      label.textContent = categoryId === 'all' ? 'All Work' : cat.label;
+      label.textContent = categoryId === 'all' ? (window.t ? window.t('allWork') : 'All Work') : (window.currentLang === 'ro' && cat.labelRo ? cat.labelRo : cat.label);
     }
 
     this.transitionGrid();
