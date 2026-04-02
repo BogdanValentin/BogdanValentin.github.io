@@ -1,8 +1,6 @@
 // ============================================================
 //  Language switcher — RO / EN
-//  Translations are mirrored in en.json and ro.json (root).
-//  Edit those JSON files to update text; update TRANSLATIONS
-//  below to match so the in-page bundle stays in sync.
+//  All translations live in the TRANSLATIONS object below.
 // ============================================================
 
 const TRANSLATIONS = {
@@ -18,11 +16,11 @@ const TRANSLATIONS = {
     aboutLine2: "photographer,",
     aboutLine3: "Bucharest.",
     fileTitle1: "Professional",
-    file1Body: "I work as a backend developer. Student at the Faculty of Automation at UPB Bucharest. Former student at Mihai Eminescu High School in Calarasi. I\u2019ve loved computers from a young age \u2014 my dad was a geek and we had a PC at home since I was born. I work on personal projects in my free time: this website, two Minecraft mods, a music player, a Wordle clone, my thesis project (scan & pay), etc.",
+    file1Body: "I work as a backend developer. Student at the Faculty of Automation at UPB Bucharest. Former student at Mihai Eminescu High School in Calarasi. I\u2019ve loved computers from a young age as my dad was a geek and we had a PC at home since I was born. I work on personal projects in my free time: this website, two Minecraft mods, a music player, a Wordle clone, my thesis project (scan & pay), etc.",
     fileTitle2: "Photography",
-    file2Body: "Passionate about photography since high school, I gradually started attending competitions, festivals, and events. I shoot with a Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) and a Sony A7 III (16-55mm f/2.8). I mainly photograph animals (I love cats \uD83D\uDC31), landscapes, astronomy, portraits, architecture, and planes.",
+    file2Body: "Passionate about photography since high school, I gradually started attending competitions, festivals, and events. I shoot with a Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8). I mainly photograph animals (I love cats \uD83D\uDC31), landscapes, astronomy, portraits, architecture, and planes.",
     fileTitle3: "Other",
-    file3Body: "As hobbies, I enjoy video games (Minecraft, Rimworld, Stardew Valley, etc.), staying active: running, cycling, bouldering, swimming \u2014 and I love wandering around aimlessly. I listen to pretty much any genre, but I prefer electronic music.",
+    file3Body: "As hobbies, I enjoy video games (Minecraft, Rimworld, Stardew Valley, etc.), staying active: running, cycling, bouldering, swimming and I love wandering around aimlessly. I listen to pretty much any genre, but I prefer electronic music.",
     archiveTitle: "Previous version",
     archiveDesc: "First version, back when LLMs didn\u2019t exist.",
     archiveLink: "Visit \u2197",
@@ -60,7 +58,7 @@ const TRANSLATIONS = {
     fileTitle1: "Profesional",
     file1Body: "Lucrez ca backend developer. Student la facultatea de Automatica din cadrul UPB Bucuresti. Fost elev la Liceul Teoretic \u201cMihai Eminescu\u201d Calarasi. Mi-au placut calculatoarele inca de mic, de unde si tata a fost un geek si am avut PC acasa de cand m-am nascut. Lucrez la proiecte personale in timpul liber: site-ul asta, doua moduri de Minecraft, un music player, o clona wordle, licenta mea (scan & pay) etc.",
     fileTitle2: "Fotografie",
-    file2Body: "Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) si un Sony A7 III (16-55mm f/2.8). In special fotografiez animale (iubesc pisicile \uD83D\uDC31), peisaje, astronomie, portrete, arhitectura, avioane.",
+    file2Body: "Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8). In special fotografiez animale (iubesc pisicile \uD83D\uDC31), peisaje, astronomie, portrete, arhitectura, avioane.",
     fileTitle3: "Altele",
     file3Body: "Ca pasiuni, in timpul liber imi place sa joc jocuri video (Minecraft, Rimworld, Stardew Valley etc.), sa fiu activ: alergat, bicicleta, bouldering, inot si ador sa ma plimb de nebun. Ascult cam orice gen muzical, dar prefer muzica electronica.",
     archiveTitle: "Versiunea anterioara",
@@ -94,42 +92,119 @@ window.t = function(key) {
   return (TRANSLATIONS[window.currentLang] || TRANSLATIONS.ro)[key] || key;
 };
 
-// Glitch characters matching the Baffle.js example
-const GLITCH_CHARS = "\u2588\u2593\u2588 \u2592\u2591/\u2592\u2591 \u2588\u2591\u2592\u2593/ \u2588\u2592\u2592 \u2593\u2592\u2593/\u2588 \u2591\u2588\u2592/ \u2592\u2593\u2591 \u2588<\u2591\u2592 \u2593/\u2591>";
+var GLITCH_CHARS = "\u2588\u2593\u2588 \u2592\u2591/\u2592\u2591 \u2588\u2591\u2592\u2593/ \u2588\u2592\u2592 \u2593\u2592\u2593/\u2588 \u2591\u2588\u2592/ \u2592\u2593\u2591 \u2588<\u2591\u2592 \u2593/\u2591>";
+
+function glitchReveal(elements, getNewText, onDone) {
+  var SPEED      = 25;   // ms per frame
+  var SCRAMBLE   = 120;  // ms of pure scramble before reveal
+  var REVEAL     = 450;  // ms to progressively show new text
+  var start      = Date.now();
+
+  var items = Array.from(elements).map(function(el) {
+    return { el: el, target: getNewText(el) };
+  });
+
+  function tick() {
+    var elapsed  = Date.now() - start;
+    var progress = Math.max(0, (elapsed - SCRAMBLE) / REVEAL);
+    var done     = elapsed >= SCRAMBLE + REVEAL;
+
+    items.forEach(function(item) {
+      var t      = item.target;
+      var reveal = done ? t.length : Math.floor(progress * t.length);
+      var text   = t.slice(0, reveal);
+      for (var i = reveal; i < t.length; i++) {
+        text += GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+      }
+      item.el.textContent = text;
+    });
+
+    if (done) {
+      items.forEach(function(item) {
+        item.el.textContent = item.target;
+        if (item.el.hasAttribute('data-text')) {
+          item.el.setAttribute('data-text', item.target);
+        }
+      });
+      if (onDone) onDone();
+    } else {
+      setTimeout(tick, SPEED);
+    }
+  }
+
+  tick();
+}
+
+function updateButton() {
+  var flag = window.currentLang === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDF4';
+  var code = window.currentLang === 'en' ? 'EN' : 'RO';
+  var html = '<span class="lang-flag">' + flag + '</span> ' + code;
+  document.querySelectorAll('.lang-toggle').forEach(function(btn) {
+    btn.innerHTML = html;
+  });
+}
+
+function getCatFromEl(el) {
+  var row = el.parentElement;
+  var id  = row && row.dataset && row.dataset.category;
+  if (!id || id === 'all') return null;
+  if (typeof GALLERY_CATEGORIES === 'undefined') return null;
+  return GALLERY_CATEGORIES.find(function(c) { return c.id === id; }) || null;
+}
+
+function getCategoryLabelText() {
+  if (!window.gallery) return window.t('allWork');
+  var id = window.gallery.activeCategory;
+  if (!id || id === 'all') return window.t('allWork');
+  var cat = (typeof GALLERY_CATEGORIES !== 'undefined')
+    ? GALLERY_CATEGORIES.find(function(c) { return c.id === id; })
+    : null;
+  if (!cat) return window.t('allWork');
+  return (window.currentLang === 'ro' && cat.labelRo) ? cat.labelRo : cat.label;
+}
 
 function applyTranslations(animate) {
-  if (animate && typeof baffle !== 'undefined') {
-    const b = baffle('[data-i18n]');
-    b.set({ characters: GLITCH_CHARS, speed: 120 });
-    b.start();
-    setTimeout(function() {
-      b.text(function(el) { return window.t(el.dataset.i18n); });
-      b.reveal(1500);
-    }, 400);
+  var staticEls  = Array.from(document.querySelectorAll('[data-i18n]'));
+  var catLabel   = document.getElementById('activeCategoryLabel');
+  var catNameEls = Array.from(document.querySelectorAll('#categoryList .category-name'));
+
+  function getText(el) {
+    if (el === catLabel) return getCategoryLabelText();
+    if (el.classList.contains('category-name')) {
+      var row = el.parentElement;
+      var id  = row && row.dataset && row.dataset.category;
+      if (!id || id === 'all') return '\u2726 ' + window.t('allWork');
+      var cat = getCatFromEl(el);
+      return cat ? ((window.currentLang === 'ro' && cat.labelRo) ? cat.labelRo : cat.label) : el.textContent;
+    }
+    return window.t(el.dataset.i18n);
+  }
+
+  if (animate) {
+    var allEls = staticEls.concat(catNameEls);
+    if (catLabel) allEls.push(catLabel);
+
+    glitchReveal(allEls, getText, function() {
+      // Rebuild properly after animation so event listeners are re-attached
+      if (window.gallery && typeof window.gallery.buildCategoryIndex === 'function') {
+        window.gallery.buildCategoryIndex();
+      }
+    });
   } else {
-    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    staticEls.forEach(function(el) {
       el.textContent = window.t(el.dataset.i18n);
       if (el.hasAttribute('data-text')) {
         el.setAttribute('data-text', window.t(el.dataset.i18n));
       }
     });
+    if (catLabel) catLabel.textContent = getCategoryLabelText();
+    if (window.gallery && typeof window.gallery.buildCategoryIndex === 'function') {
+      window.gallery.buildCategoryIndex();
+    }
   }
 
-  // Update active category label (dynamically rendered by gallery)
-  var catLabel = document.getElementById('activeCategoryLabel');
-  if (catLabel) catLabel.textContent = window.t('allWork');
-
-  // Rebuild category index with translated labels
-  if (window.gallery && typeof window.gallery.buildCategoryIndex === 'function') {
-    window.gallery.buildCategoryIndex();
-  }
-
-  // Update html lang attribute
   document.documentElement.lang = window.currentLang;
-
-  // Update button: show the OTHER language
-  var btn = document.getElementById('langToggle');
-  if (btn) btn.textContent = window.currentLang === 'en' ? 'RO' : 'EN';
+  updateButton();
 }
 
 window.setLanguage = function(lang) {
@@ -139,13 +214,10 @@ window.setLanguage = function(lang) {
   applyTranslations(true);
 };
 
-// Set button text immediately — button is already in DOM above this script
-(function() {
-  var btn = document.getElementById('langToggle');
-  if (btn) btn.textContent = window.currentLang === 'en' ? 'RO' : 'EN';
-})();
+// Set button immediately — already in DOM above this script
+updateButton();
 
-// Apply initial translations after the DOM is fully ready (no animation on first load)
+// Apply initial translations after DOM + gallery scripts are ready
 document.addEventListener('DOMContentLoaded', function() {
   applyTranslations(false);
 });

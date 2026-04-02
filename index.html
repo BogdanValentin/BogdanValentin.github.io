@@ -35,6 +35,7 @@
       <a href="#" class="mobile-menu-link" data-panel="about" data-i18n="about">About</a>
       <a href="#" class="mobile-menu-link" data-panel="contact" data-i18n="contact">Contact</a>
     </nav>
+    <button class="lang-toggle lang-toggle--menu" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
   </div>
 </div>
 
@@ -89,14 +90,12 @@
             <span class="ab-file-title" data-i18n="fileTitle2">Fotografie</span>
             <div class="ab-file-line"></div>
           </div>
-          <p class="ab-body" data-i18n="file2Body">Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8) si un Sony A7 III (16-55mm f/2.8). In special fotografiez animale (iubesc pisicile 🐱), peisaje, astronomie, portrete, arhitectura, avioane.</p>
+          <p class="ab-body" data-i18n="file2Body">Pasionat de fotografie inca din liceu, am inceput usor usor sa merg la concursuri, festivaluri, evenimente. Fotografiez cu un Nikon D3400 (18-55mm, 70-300mm, 50mm f/1.8). In special fotografiez animale (iubesc pisicile 🐱), peisaje, astronomie, portrete, arhitectura, avioane.</p>
           <div class="ab-tags">
             <span class="ab-tag">Nikon D3400</span>
-            <span class="ab-tag">Sony A7 III</span>
             <span class="ab-tag">18-55mm</span>
             <span class="ab-tag">70-300mm</span>
             <span class="ab-tag">50mm f/1.8</span>
-            <span class="ab-tag">16-55mm f/2.8</span>
           </div>
         </div>
 
@@ -209,6 +208,7 @@
       <span class="category-index-sep">/</span>
       <a href="#" data-panel="contact" id="navContact" data-i18n="contact">Contact</a>
     </div>
+    <button class="lang-toggle lang-toggle--index" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
     <p class="category-index-coords">44.4385° N, 26.0515° E</p>
   </div>
 </div>
@@ -249,23 +249,11 @@
     60%
   </div>
   <div class="switch" id="controls">
-    <button class="switch-button switch-button-current" onclick="gallery.setZoom(0.6, this)">
-      <span class="indicator-dot"></span>
-      NORMAL
-    </button>
-    <button class="switch-button" onclick="gallery.setZoom(1.0, this)">
-      <span class="indicator-dot"></span>
-      ZOOM IN
-    </button>
-    <button class="switch-button" onclick="gallery.autoFitZoom(this)">
-      <span class="indicator-dot"></span>
-      FIT
-    </button>
+    <button class="switch-button switch-button-current" onclick="gallery.setZoom(0.6, this)">NORMAL</button>
+    <button class="switch-button" onclick="gallery.setZoom(1.0, this)">ZOOM IN</button>
+    <button class="switch-button" onclick="gallery.autoFitZoom(this)">FIT</button>
   </div>
 
-  <button class="sound-toggle active" id="soundToggle">
-    <canvas class="sound-wave-canvas" id="soundWaveCanvas" width="32" height="16"></canvas>
-  </button>
   <div class="vm-group" id="vmGroup">
     <button class="vm-btn vm-active" id="vmBtn0" aria-label="Split view">
       <svg width="20" height="13" viewBox="0 0 20 13" fill="none">
@@ -291,6 +279,9 @@
       </svg>
     </button>
   </div>
+  <button class="sound-toggle active" id="soundToggle">
+    <canvas class="sound-wave-canvas" id="soundWaveCanvas" width="32" height="16"></canvas>
+  </button>
 </div>
 
 <!-- Footer Navigation -->
@@ -302,7 +293,6 @@
 </footer>
 
   <!-- Language system (loads before defer gallery scripts so window.t() is available) -->
-  <script src="https://unpkg.com/baffle/dist/baffle.min.js"></script>
   <script src="lang.js"></script>
 
   <!-- GSAP Dependencies - ADD THESE -->
