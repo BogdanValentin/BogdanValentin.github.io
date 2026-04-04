@@ -90,17 +90,6 @@ body.zoom-mode #activeCategoryLabel {
 }
 
 /* Grid column assignments */
-.values-section {
-  grid-column: 11 / span 2;
-  text-align: right;
-  justify-self: end;
-  align-self: start;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 0.4em;
-  padding: 0.35em 0.65em;
-}
 
 /* ===== LANGUAGE TOGGLE ===== */
 .lang-toggle {
@@ -114,16 +103,12 @@ body.zoom-mode #activeCategoryLabel {
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: none;
   border-radius: 0.4em;
   color: var(--color-text);
-  padding: 0.35em 0.75em;
+  padding: 5px 10px;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-  pointer-events: auto;
-}
-.lang-toggle:hover {
-  border-color: var(--color-text);
+  transition: color 0.2s;
 }
 
 .lang-flag {
@@ -245,16 +230,36 @@ body.zoom-mode #activeCategoryLabel {
 }
 
 
-.info-section {
-  grid-column: 9 / span 4;
-  text-align: right;
+.footer-right {
+  grid-column: 7 / span 6;
   justify-self: end;
   align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-section {
+  text-align: right;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0.4em;
-  padding: 0.35em 0.65em;
+  padding: 5px 10px;
+}
+
+/* On desktop the lang toggle lives in the footer; hide the header one */
+@media (min-width: 769px) {
+  #langToggle { display: none; }
+}
+
+/* Lang toggle sitting beside the coords in the footer */
+.lang-toggle--footer {
+  grid-column: unset;
+  align-self: unset;
+  justify-self: unset;
+  position: static;
+  font-size: inherit;
 }
 
 /* Footer text styling */
@@ -788,8 +793,19 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
 /* ===== ACTIVE CATEGORY INDICATOR ===== */
 .active-category-indicator {
+  grid-column: 11 / span 2;
+  justify-self: end;
+  align-self: start;
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.4em;
+  padding: 5px 10px;
   font-family: "TheGoodMonolith", monospace;
   font-size: 32px;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.9);
@@ -1060,6 +1076,12 @@ body.fullscreen-mode .controls-container { left: 50%; }
 .category-index-sep {
   color: rgba(255, 255, 255, 0.15);
   font-size: 1.3rem;
+}
+
+.category-index-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .category-index-coords {

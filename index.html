@@ -16,9 +16,7 @@
 <!-- Header Navigation -->
 <header class="header">
   <button class="lang-toggle" id="langToggle" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
-  <div class="values-section">
-    <h3 class="active-category-indicator" id="activeCategoryLabel">All Work</h3>
-  </div>
+  <h3 class="active-category-indicator" id="activeCategoryLabel">All Work</h3>
 </header>
 
 <!-- Mobile hamburger button -->
@@ -208,8 +206,10 @@
       <span class="category-index-sep">/</span>
       <a href="#" data-panel="contact" id="navContact" data-i18n="contact">Contact</a>
     </div>
-    <button class="lang-toggle lang-toggle--index" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
-    <p class="category-index-coords">44.4385° N, 26.0515° E</p>
+    <div class="category-index-right">
+      <button class="lang-toggle lang-toggle--index" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
+      <p class="category-index-coords">44.4385° N, 26.0515° E</p>
+    </div>
   </div>
 </div>
 
@@ -286,9 +286,12 @@
 
 <!-- Footer Navigation -->
 <footer class="footer">
-  <div class="info-section">
-    <p data-i18n="footerCity">2026 • Bucharest</p>
-    <p>44.4385° N, 26.0515° E</p>
+  <div class="footer-right">
+    <button class="lang-toggle lang-toggle--footer" onclick="setLanguage(window.currentLang === 'en' ? 'ro' : 'en')">EN</button>
+    <div class="info-section">
+      <p data-i18n="footerCity">2026 • Bucharest</p>
+      <p>44.4385° N, 26.0515° E</p>
+    </div>
   </div>
 </footer>
 

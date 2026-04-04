@@ -33,6 +33,15 @@
 
 gsap.registerPlugin(Draggable, CustomEase, Flip);
 
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 /**
  * Animated canvas preloader displayed while initial thumbnails load.
  * Call complete() to fade out and remove.
@@ -635,7 +644,7 @@ class FashionGallery {
 
     if (typeof GALLERY_CATEGORIES !== 'undefined') {
       const allImages = [];
-      GALLERY_CATEGORIES.forEach(cat => allImages.push(...cat.images));
+      shuffleArray(GALLERY_CATEGORIES).forEach(cat => allImages.push(...cat.images));
       this.fashionImages = allImages.length > 0 ? allImages : this.placeholderImages;
     } else {
       this.fashionImages = this.placeholderImages;
@@ -1535,7 +1544,7 @@ class FashionGallery {
     // Resolve images for the category
     if (categoryId === 'all') {
       const allImg = [];
-      GALLERY_CATEGORIES.forEach(c => allImg.push(...c.images));
+      shuffleArray(GALLERY_CATEGORIES).forEach(c => allImg.push(...c.images));
       this.fashionImages = allImg.length > 0 ? allImg : this.placeholderImages;
     } else {
       const cat = GALLERY_CATEGORIES.find(c => c.id === categoryId);
@@ -2027,16 +2036,14 @@ initDraggable() {
     }
     this._isAnimating = true;
     const fitZoom = this.calculateFitZoom();
-    this.config.currentZoom = fitZoom;
     const newGap = this.calculateGapForZoom(fitZoom);
     this.soundSystem.play(fitZoom < 0.6 ? "zoom-out" : "zoom-in");
+    // Pan to center at the CURRENT scale first, so the grid moves to middle before zooming out
     this.calculateGridDimensions(this.config.currentGap);
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const currentScaledWidth =
-      this.gridDimensions.width * this.config.currentZoom;
-    const currentScaledHeight =
-      this.gridDimensions.height * this.config.currentZoom;
+    const currentScaledWidth = this.gridDimensions.width * this.config.currentZoom;
+    const currentScaledHeight = this.gridDimensions.height * this.config.currentZoom;
     const centerX = (vw - currentScaledWidth) / 2;
     const centerY = (vh - currentScaledHeight) / 2;
     gsap.to(this.canvasWrapper, {
@@ -2045,6 +2052,7 @@ initDraggable() {
       y: centerY,
       ease: this.centerEase,
       onComplete: () => {
+        this.config.currentZoom = fitZoom;
         if (newGap !== this.config.currentGap) {
           this.gridItems.forEach((itemData) => {
             const newX = itemData.col * (this.config.itemWidth + newGap);
