@@ -272,6 +272,42 @@ class FashionGallery {
     this.config.rows = rows;
     this.config.cols = cols;
   }
+  _updateConfigForViewport() {
+    this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE ||
+      ('ontouchstart' in window && window.innerWidth <= 1024);
+    this.config.itemWidth  = this.isMobile ? CONSTANTS.GRID.WIDTH_MOBILE  : CONSTANTS.GRID.WIDTH;
+    this.config.itemHeight = this.isMobile ? CONSTANTS.GRID.HEIGHT_MOBILE : CONSTANTS.GRID.HEIGHT;
+    this.config.baseGap    = this.isMobile ? 10 : 16;
+  }
+  _handleResize() {
+    if (this.zoomState.isActive) return;
+    this._updateConfigForViewport();
+    this.setGridShape();
+    const fitZoom = this.calculateFitZoom();
+    this.config.currentZoom = fitZoom;
+    this.config.currentGap  = this.calculateGapForZoom(fitZoom);
+    this.generateGridItems();
+    this.gridItems.forEach(({ element }) => { gsap.set(element, { opacity: 1 }); });
+    gsap.set(this.canvasWrapper, { scale: fitZoom });
+    this.calculateGridDimensions(this.config.currentGap);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const { scaledWidth, scaledHeight } = this.gridDimensions;
+    const cx = (vw - scaledWidth) / 2;
+    const cy = (vh - scaledHeight) / 2;
+    gsap.set(this.canvasWrapper, { x: cx, y: cy });
+    this.lastValidPosition.x = cx;
+    this.lastValidPosition.y = cy;
+    this._targetZoom = fitZoom;
+    this._targetX = cx;
+    this._targetY = cy;
+    if (this._scrollZoomTween) { this._scrollZoomTween.kill(); this._scrollZoomTween = null; }
+    clearTimeout(this._scrollZoomDebounce);
+    this.initDraggable();
+    this.setupViewportObserver();
+    this.updatePercentageIndicator(fitZoom);
+    this.updateZoomButtonHighlight(fitZoom);
+  }
   /** Collect all image paths from GALLERY_CATEGORIES into this.fashionImages. */
   initImageData() {
     // Placeholder images (fallback when categories have no photos)
@@ -1386,20 +1422,22 @@ class FashionGallery {
     this.viewport.addEventListener('touchend', (e) => {
       if (e.touches.length < 2 && startDist > 0) {
         startDist = 0;
-        // Mark pinch ended — but don't start the timer yet; the remaining
-        // finger can still trigger GSAP's onClick if it lifts < 400ms later.
         this._pinchJustEnded = true;
         clearTimeout(this._pinchEndTimer);
+        // Prevent the browser from generating a synthetic click after the pinch
+        e.preventDefault();
         // Finalize: update gap + draggable bounds
         this.finalizeScrollZoom(this.config.currentZoom);
         this.updateZoomButtonHighlight(this.config.currentZoom);
       }
-      // Only start the suppression countdown once ALL fingers are off the screen.
+      // Start suppression window only once ALL fingers are off screen,
+      // so the last remaining finger can't accidentally trigger a click either
       if (e.touches.length === 0 && this._pinchJustEnded) {
+        e.preventDefault();
         clearTimeout(this._pinchEndTimer);
         this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
       }
-    }, { passive: true });
+    }, { passive: false });
   }
   updateZoomButtonHighlight(zoomLevel) {
     const buttons = document.querySelectorAll(".switch-button");
@@ -1835,12 +1873,14 @@ initDraggable() {
   init() {
     this.buildCategoryIndex();
 
+    // Sync item dimensions to actual viewport before generating the grid
+    this._updateConfigForViewport();
+    // Always start at NORMAL zoom (0.6) so the NORMAL button is highlighted
+    this.config.currentZoom = CONSTANTS.ZOOM.NORMAL;
     // Set grid shape based on aspect ratio and image count
     this.setGridShape();
     this.config.currentGap = this.calculateGapForZoom(this.config.currentZoom);
     this.generateGridItems();
-
-    // Allow pinch-zoom and gestures on mobile (no preventDefault)
 
     // Set initial opacity for viewport to hide the flash
     gsap.set(this.viewport, { opacity: 0 });
@@ -1861,14 +1901,7 @@ initDraggable() {
     this.lastValidPosition.x = centerX;
     this.lastValidPosition.y = centerY;
     this.updatePercentageIndicator(this.config.currentZoom);
-
-    // Set correct initial active button
-    if (this.isMobile) {
-      document.querySelectorAll(".switch-button").forEach((btn) => {
-        btn.classList.remove("switch-button-current");
-      });
-      // No exact match on mobile default zoom, so none highlighted
-    }
+    this.updateZoomButtonHighlight(this.config.currentZoom);
 
     // Setup event listeners
     this.setupEventListeners();
@@ -1904,15 +1937,8 @@ initDraggable() {
   }
   setupEventListeners() {
     window.addEventListener("resize", () => {
-      // Re-detect mobile on resize/orientation change
-      this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE || ('ontouchstart' in window && window.innerWidth <= 1024);
-      // Skip reset when in zoom mode (e.g. fullscreen toggle triggers resize)
-      if (this.zoomState.isActive) return;
-      setTimeout(() => {
-        this.setGridShape();
-        this.resetPosition();
-        this.initDraggable();
-      }, 100);
+      clearTimeout(this._resizeTimer);
+      this._resizeTimer = setTimeout(() => this._handleResize(), 150);
     });
     if (!this.isMobile) {
       document.addEventListener("mouseleave", () => this.handleMouseLeave());
