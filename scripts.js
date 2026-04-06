@@ -255,23 +255,31 @@ class FashionGallery {
   }
 
   setGridShape() {
-    // Calculate grid shape based on aspect ratio and image count
     const n = this.fashionImages ? this.fashionImages.length : 24;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const portrait = h > w;
-    let rows, cols;
-    if (portrait) {
-      // Portrait: more rows, fewer columns
-      cols = Math.max(2, Math.round(Math.sqrt(n * w / h)));
-      rows = Math.ceil(n / cols);
-    } else {
-      // Landscape: more columns, fewer rows
-      rows = Math.max(2, Math.round(Math.sqrt(n * h / w)));
-      cols = Math.ceil(n / rows);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    // Use the same reference gap as calculateFitZoom so the geometry is consistent
+    const gap   = this.calculateGapForZoom(1.0);
+    const cellW = this.config.itemWidth  + gap;
+    const cellH = this.config.itemHeight + gap;
+
+    // Solve for rows so that the grid's pixel aspect ratio matches the viewport:
+    //   (cols * cellW) / (rows * cellH) = vw / vh,  cols * rows ≈ n
+    //   → rows = sqrt(n * vh * cellW / (vw * cellH))
+    const rawRows = Math.sqrt(n * vh * cellW / (vw * cellH));
+
+    // Try floor and ceil; pick whichever produces a grid AR closer to the viewport AR
+    const targetAR = vw / vh;
+    const candidates = [Math.max(2, Math.floor(rawRows)), Math.max(2, Math.ceil(rawRows))];
+    let bestRows = candidates[0];
+    let bestDiff = Infinity;
+    for (const r of candidates) {
+      const c = Math.ceil(n / r);
+      const diff = Math.abs((c * cellW) / (r * cellH) - targetAR);
+      if (diff < bestDiff) { bestDiff = diff; bestRows = r; }
     }
-    this.config.rows = rows;
-    this.config.cols = cols;
+    this.config.rows = bestRows;
+    this.config.cols = Math.ceil(n / bestRows);
   }
   _updateConfigForViewport() {
     this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE ||
