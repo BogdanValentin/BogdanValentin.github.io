@@ -2020,8 +2020,7 @@ body.fullscreen-mode .controls-container { left: 50%; }
   }
 
   body.zoom-mode .controls-container .switch,
-  body.zoom-mode .controls-container .vm-group,
-  body.zoom-mode .controls-container .percentage-indicator {
+  body.zoom-mode .controls-container .vm-group {
     display: flex;
   }
 

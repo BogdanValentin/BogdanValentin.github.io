@@ -616,7 +616,6 @@ class FashionGallery {
     const wasFullscreen = this.zoomState.isFullscreen;
     this.zoomState.isFullscreen = false;
     splitContainer.classList.remove("active");
-    this.controlsContainer.classList.remove("split-mode");
     gsap.to(splitContainer, {
       opacity: 0,
       duration: 0.8,
@@ -668,6 +667,7 @@ class FashionGallery {
           this.zoomState.scalingOverlay = null;
         }
         splitContainer.classList.remove("active");
+        this.controlsContainer.classList.remove("split-mode");
         document.body.classList.remove("zoom-mode");
         if (wasFullscreen) {
           document.body.classList.remove("fullscreen-mode");
@@ -1387,12 +1387,17 @@ class FashionGallery {
       return Math.sqrt(dx * dx + dy * dy);
     };
 
+    // Capture phase: fires before GSAP's bubble-phase listeners on canvasWrapper,
+    // so _pinchJustEnded is already true when GSAP evaluates its onClick tap check.
     this.viewport.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
+        // Block any click detection for the entire pinch gesture
+        this._pinchJustEnded = true;
+        clearTimeout(this._pinchEndTimer);
         startDist = getDistance(e.touches);
         startZoom = this.config.currentZoom;
       }
-    }, { passive: true });
+    }, { capture: true, passive: true });
 
     this.viewport.addEventListener('touchmove', (e) => {
       if (e.touches.length !== 2 || this.zoomState.isActive) return;
