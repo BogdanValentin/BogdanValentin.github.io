@@ -1599,18 +1599,15 @@ initDraggable() {
   }
   calculateFitZoom() {
     const vw = window.innerWidth;
-    const vh = window.innerHeight - 80;
+    const vh = window.innerHeight;
     const currentGap = this.calculateGapForZoom(1.0);
     const gridWidth =
       this.config.cols * (this.config.itemWidth + currentGap) - currentGap;
     const gridHeight =
       this.config.rows * (this.config.itemHeight + currentGap) - currentGap;
-    const margin = 40;
-    const availableWidth = vw - margin * 2;
-    const availableHeight = vh - margin * 2;
-    const zoomToFitWidth = availableWidth / gridWidth;
-    const zoomToFitHeight = availableHeight / gridHeight;
-    const fitZoom = Math.min(zoomToFitWidth, zoomToFitHeight);
+    const zoomToFitWidth = vw / gridWidth;
+    const zoomToFitHeight = vh / gridHeight;
+    const fitZoom = Math.max(zoomToFitWidth, zoomToFitHeight);
     return Math.max(0.1, Math.min(2.0, fitZoom));
   }
   playIntroAnimation() {
