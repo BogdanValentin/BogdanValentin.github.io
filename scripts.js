@@ -235,6 +235,7 @@ class FashionGallery {
     this._isDragging = false;
     this._isAnimating = false;
     this._pinchJustEnded = false;
+    this._pinchActive = false;
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
@@ -280,7 +281,7 @@ class FashionGallery {
     this.config.baseGap    = this.isMobile ? 10 : 16;
   }
   _handleResize() {
-    if (this.zoomState.isActive) return;
+    if (this.zoomState.isActive || this._pinchActive) return;
     this._updateConfigForViewport();
     this.setGridShape();
     const fitZoom = this.calculateFitZoom();
@@ -1376,10 +1377,12 @@ class FashionGallery {
       this.initDraggable();
     }
   }
-  /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0. */
+  /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0, zooms toward pinch midpoint. */
   initPinchZoom() {
     let startDist = 0;
     let startZoom = this.config.currentZoom;
+    let startX = 0, startY = 0;       // canvas position at gesture start
+    let startMidX = 0, startMidY = 0; // finger midpoint at gesture start
 
     const getDistance = (touches) => {
       const dx = touches[0].clientX - touches[1].clientX;
@@ -1388,39 +1391,54 @@ class FashionGallery {
     };
 
     // Capture phase: fires before GSAP's bubble-phase listeners on canvasWrapper,
-    // so _pinchJustEnded is already true when GSAP evaluates its onClick tap check.
+    // so _pinchJustEnded is true before GSAP's tap detection runs.
     this.viewport.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
-        // Block any click detection for the entire pinch gesture
+        this._pinchActive = true;
         this._pinchJustEnded = true;
         clearTimeout(this._pinchEndTimer);
         startDist = getDistance(e.touches);
         startZoom = this.config.currentZoom;
+        // Snapshot canvas state so touchmove can zoom relative to this baseline
+        startX = this.lastValidPosition.x;
+        startY = this.lastValidPosition.y;
+        startMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        startMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       }
     }, { capture: true, passive: true });
 
     this.viewport.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 2 || this.zoomState.isActive) return;
+      if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0) return;
       e.preventDefault();
 
       const dist = getDistance(e.touches);
-      const scale = dist / startDist;
       const fitZoom = this.calculateFitZoom();
-      let newZoom = Math.max(fitZoom, Math.min(1.0, startZoom * scale));
+      let newZoom = Math.max(fitZoom, Math.min(1.0, startZoom * (dist / startDist)));
+
+      // Current midpoint between fingers
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+      let newX, newY;
+      if (newZoom <= fitZoom + 0.005) {
+        // At minimum zoom, snap to center so the grid can't drift off-screen
+        this.calculateGridDimensions(this.config.currentGap);
+        const { scaledWidth, scaledHeight } = this.gridDimensions;
+        newX = (window.innerWidth  - scaledWidth)  / 2;
+        newY = (window.innerHeight - scaledHeight) / 2;
+      } else {
+        // Zoom toward the pinch midpoint:
+        // find which canvas point was under the start-midpoint, keep it there
+        const canvasOriginX = (startMidX - startX) / startZoom;
+        const canvasOriginY = (startMidY - startY) / startZoom;
+        newX = midX - canvasOriginX * newZoom;
+        newY = midY - canvasOriginY * newZoom;
+      }
 
       this.config.currentZoom = newZoom;
-
-      // Center the grid at the new zoom
-      this.calculateGridDimensions(this.config.currentGap);
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const { scaledWidth, scaledHeight } = this.gridDimensions;
-      const cx = (vw - scaledWidth) / 2;
-      const cy = (vh - scaledHeight) / 2;
-
-      gsap.set(this.canvasWrapper, { scale: newZoom, x: cx, y: cy });
-      this.lastValidPosition.x = cx;
-      this.lastValidPosition.y = cy;
+      this.lastValidPosition.x = newX;
+      this.lastValidPosition.y = newY;
+      gsap.set(this.canvasWrapper, { scale: newZoom, x: newX, y: newY });
       this.updatePercentageIndicator(newZoom);
     }, { passive: false });
 
@@ -1429,18 +1447,17 @@ class FashionGallery {
         startDist = 0;
         this._pinchJustEnded = true;
         clearTimeout(this._pinchEndTimer);
-        // Prevent the browser from generating a synthetic click after the pinch
         e.preventDefault();
-        // Finalize: update gap + draggable bounds
         this.finalizeScrollZoom(this.config.currentZoom);
         this.updateZoomButtonHighlight(this.config.currentZoom);
       }
-      // Start suppression window only once ALL fingers are off screen,
-      // so the last remaining finger can't accidentally trigger a click either
-      if (e.touches.length === 0 && this._pinchJustEnded) {
-        e.preventDefault();
-        clearTimeout(this._pinchEndTimer);
-        this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
+      if (e.touches.length === 0) {
+        this._pinchActive = false;
+        if (this._pinchJustEnded) {
+          e.preventDefault();
+          clearTimeout(this._pinchEndTimer);
+          this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
+        }
       }
     }, { passive: false });
   }
