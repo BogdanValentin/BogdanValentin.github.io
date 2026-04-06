@@ -199,7 +199,6 @@ class FashionGallery {
     this.navPrev = document.getElementById("navPrev");
     this.navNext = document.getElementById("navNext");
     this.controlsContainer = document.getElementById("controlsContainer");
-    this.soundToggle = document.getElementById("soundToggle");
     this.vmBtns = [0, 1, 2].map(i => document.getElementById(`vmBtn${i}`));
     // Create custom eases
     this.customEase = CustomEase.create("smooth", ".87,0,.13,1");
@@ -250,8 +249,6 @@ class FashionGallery {
     this.vmBtns.forEach((btn, i) => {
       btn.onclick = () => this._setViewMode(i);
     });
-    // Initialize sound system
-    this.initSoundSystem();
     // Initialize image data
     this.initImageData();
   }
@@ -274,363 +271,6 @@ class FashionGallery {
     }
     this.config.rows = rows;
     this.config.cols = cols;
-  }
-  initSoundSystem() {
-    this.soundSystem = {
-      enabled: true,
-      sounds: {
-        click:        new Audio("https://assets.codepen.io/7558/glitch-fx-001.mp3"),
-        open:         new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
-        close:        new Audio("https://assets.codepen.io/7558/click-glitch-001.mp3"),
-        button:       new Audio("sounds/BUTTON.WAV"),
-        liftoff:      new Audio("sounds/liftoff.wav"),
-        land:         new Audio("sounds/land.wav"),
-        "zoom-in":    new Audio("https://assets.codepen.io/7558/whoosh-fx-001.mp3"),
-        "zoom-out":   new Audio("https://assets.codepen.io/7558/whoosh-fx-001.mp3"),
-        "drag-start": new Audio("https://assets.codepen.io/7558/preloader-2s-001.mp3")
-      },
-      _lastPlayTime: {},
-      _debounceMs: {
-        "drag-start": 300,
-        "click": 100,
-        "button": 200,
-        "liftoff": 400,
-        "land": 400,
-        "open": 400,
-        "close": 400,
-        "zoom-in": 500,
-        "zoom-out": 500,
-        "whoosh": 350
-      },
-      // Web Audio API synth engine for sci-fi sounds
-      _audioCtx: null,
-      _getCtx: () => {
-        if (!this.soundSystem._audioCtx) {
-          this.soundSystem._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (this.soundSystem._audioCtx.state === 'suspended') {
-          this.soundSystem._audioCtx.resume();
-        }
-        return this.soundSystem._audioCtx;
-      },
-      // Synthesized sci-fi sounds
-      synth: {
-        // Soft resonant pluck — heard on category row hover
-        hoverTick: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const osc2 = ctx.createOscillator();
-          const filter = ctx.createBiquadFilter();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(1400, t);
-          osc.frequency.exponentialRampToValueAtTime(900, t + 0.07);
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(2100, t);
-          osc2.frequency.exponentialRampToValueAtTime(1350, t + 0.07);
-          osc2.detune.setValueAtTime(5, t);
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(1800, t);
-          filter.frequency.exponentialRampToValueAtTime(800, t + 0.08);
-          filter.Q.value = 4;
-          gain.gain.setValueAtTime(0.055, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-          osc.connect(filter);
-          osc2.connect(filter);
-          filter.connect(gain).connect(ctx.destination);
-          osc.start(t); osc.stop(t + 0.09);
-          osc2.start(t); osc2.stop(t + 0.09);
-        },
-        // Confirmation chirp — category selected
-        select: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          // Two-tone chirp
-          const osc1 = ctx.createOscillator();
-          const osc2 = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(800, t);
-          osc1.frequency.exponentialRampToValueAtTime(1400, t + 0.08);
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1200, t + 0.06);
-          osc2.frequency.exponentialRampToValueAtTime(1800, t + 0.14);
-          gain.gain.setValueAtTime(0.09, t);
-          gain.gain.linearRampToValueAtTime(0.12, t + 0.04);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-          osc1.connect(gain);
-          osc2.connect(gain);
-          gain.connect(ctx.destination);
-          osc1.start(t);
-          osc1.stop(t + 0.1);
-          osc2.start(t + 0.06);
-          osc2.stop(t + 0.18);
-        },
-        // Rising sweep — menu/index opening
-        menuOpen: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(120, t);
-          osc.frequency.exponentialRampToValueAtTime(600, t + 0.25);
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(400, t);
-          filter.frequency.exponentialRampToValueAtTime(3000, t + 0.2);
-          filter.Q.value = 8;
-          gain.gain.setValueAtTime(0, t);
-          gain.gain.linearRampToValueAtTime(0.08, t + 0.03);
-          gain.gain.setValueAtTime(0.08, t + 0.15);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-          osc.connect(filter).connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.35);
-        },
-        // Falling sweep — menu/index closing
-        menuClose: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(500, t);
-          osc.frequency.exponentialRampToValueAtTime(100, t + 0.25);
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(2500, t);
-          filter.frequency.exponentialRampToValueAtTime(300, t + 0.25);
-          filter.Q.value = 6;
-          gain.gain.setValueAtTime(0.07, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-          osc.connect(filter).connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.3);
-        },
-        // Toggle blip — hamburger/sound toggle
-        toggle: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(1000, t);
-          osc.frequency.exponentialRampToValueAtTime(600, t + 0.08);
-          gain.gain.setValueAtTime(0.1, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.1);
-        },
-        // Soft nav hover — for links
-        navHover: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(3200, t);
-          osc.frequency.exponentialRampToValueAtTime(2400, t + 0.03);
-          gain.gain.setValueAtTime(0.035, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.04);
-        },
-        // Data whoosh — category switch transition
-        whoosh: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          // White noise burst through bandpass
-          const bufferSize = ctx.sampleRate * 0.25;
-          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-          const noise = ctx.createBufferSource();
-          noise.buffer = buffer;
-          const filter = ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(1000, t);
-          filter.frequency.exponentialRampToValueAtTime(4000, t + 0.1);
-          filter.frequency.exponentialRampToValueAtTime(600, t + 0.25);
-          filter.Q.value = 2;
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0, t);
-          gain.gain.linearRampToValueAtTime(0.1, t + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-          noise.connect(filter).connect(gain).connect(ctx.destination);
-          noise.start(t);
-          noise.stop(t + 0.25);
-        },
-        // Nav click — deep bass thump with digital texture
-        navClick: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          // Sub-bass thump
-          const osc = ctx.createOscillator();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(180, t);
-          osc.frequency.exponentialRampToValueAtTime(50, t + 0.08);
-          // Low noise texture
-          const bufLen = ctx.sampleRate * 0.05;
-          const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-          const d = buf.getChannelData(0);
-          for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufLen * 0.1));
-          const noise = ctx.createBufferSource();
-          noise.buffer = buf;
-          const lp = ctx.createBiquadFilter();
-          lp.type = 'lowpass';
-          lp.frequency.setValueAtTime(500, t);
-          lp.frequency.exponentialRampToValueAtTime(120, t + 0.04);
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.15, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-          osc.connect(gain);
-          noise.connect(lp).connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(t); osc.stop(t + 0.08);
-          noise.start(t); noise.stop(t + 0.05);
-        },
-        // Confirmation ping — successful action
-        confirm: () => {
-          const ctx = this.soundSystem._getCtx();
-          const t = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, t);
-          osc.frequency.setValueAtTime(1320, t + 0.08);
-          gain.gain.setValueAtTime(0.08, t);
-          gain.gain.linearRampToValueAtTime(0.1, t + 0.04);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.2);
-        }
-      },
-      // Unified play method — handles both Audio files and synth sounds
-      playSynth: (synthName) => {
-        if (!this.soundSystem.enabled) return;
-        const now = Date.now();
-        const cooldown = this.soundSystem._debounceMs[synthName] || 150;
-        const lastTime = this.soundSystem._lastPlayTime[synthName] || 0;
-        if (now - lastTime < cooldown) return;
-        this.soundSystem._lastPlayTime[synthName] = now;
-        try {
-          const fn = this.soundSystem.synth[synthName];
-          if (fn) fn();
-        } catch (e) {
-          // Silently handle audio errors
-        }
-      },
-      play: (soundName) => {
-        if (!this.soundSystem.enabled || !this.soundSystem.sounds[soundName]) return;
-        const now = Date.now();
-        const cooldown = this.soundSystem._debounceMs[soundName] || 200;
-        if (now - (this.soundSystem._lastPlayTime[soundName] || 0) < cooldown) return;
-        this.soundSystem._lastPlayTime[soundName] = now;
-        try {
-          const audio = this.soundSystem.sounds[soundName];
-          audio.pause();
-          audio.currentTime = 0;
-          audio.play().catch(() => {});
-        } catch (_) {}
-      },
-      toggle: () => {
-        this.soundSystem.enabled = !this.soundSystem.enabled;
-        this.soundToggle.classList.toggle("active", this.soundSystem.enabled);
-        if (window.updateTooltips) window.updateTooltips();
-        // Prevent visual conflicts during sound toggle
-        if (this.zoomState.isActive) return;
-        if (this.soundSystem.enabled) {
-          // No extra sound on toggle — just visual feedback
-        }
-      }
-    };
-    // Preload all sounds
-    Object.values(this.soundSystem.sounds).forEach(audio => {
-      audio.preload = "auto";
-      audio.volume = 0.3;
-    });
-    // Set initial active state on the toggle button
-    this.soundToggle.classList.add("active");
-    if (window.updateTooltips) window.updateTooltips();
-    // Initialize sound wave canvas animation
-    this.initSoundWave();
-  }
-  initSoundWave() {
-    const canvas = document.getElementById("soundWaveCanvas");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const width = 32;
-    const height = 16;
-    const centerY = Math.floor(height / 2);
-    let startTime = Date.now();
-    let currentAmplitude = this.soundSystem.enabled ? 1 : 0;
-    const interpolateColor = (color1, color2, factor) => {
-      const r1 = parseInt(color1.substring(1, 3), 16);
-      const g1 = parseInt(color1.substring(3, 5), 16);
-      const b1 = parseInt(color1.substring(5, 7), 16);
-      const r2 = parseInt(color2.substring(1, 3), 16);
-      const g2 = parseInt(color2.substring(3, 5), 16);
-      const b2 = parseInt(color2.substring(5, 7), 16);
-      const r = Math.round(r1 + factor * (r2 - r1))
-        .toString(16)
-        .padStart(2, "0");
-      const g = Math.round(g1 + factor * (g2 - g1))
-        .toString(16)
-        .padStart(2, "0");
-      const b = Math.round(b1 + factor * (b2 - b1))
-        .toString(16)
-        .padStart(2, "0");
-      return `#${r}${g}${b}`;
-    };
-    const animate = () => {
-      if (document.hidden) {
-        this._soundWaveRafId = null;
-        return;
-      }
-      const targetAmplitude = this.soundSystem.enabled ? 1 : 0;
-      currentAmplitude += (targetAmplitude - currentAmplitude) * 0.08;
-      ctx.clearRect(0, 0, width, height);
-      const time = (Date.now() - startTime) / 1000;
-      const muteFactor = 1 - currentAmplitude;
-      const primaryColor = "#2C1B14";
-      const accentColor = "#A64B23";
-      const muteColor = "#D9C4AA";
-      if (!this.soundSystem.enabled && currentAmplitude < 0.01) {
-        ctx.fillStyle = muteColor;
-        ctx.fillRect(0, centerY, width, 2);
-      } else {
-        ctx.fillStyle = interpolateColor(primaryColor, muteColor, muteFactor);
-        for (let i = 0; i < width; i++) {
-          const x = i - width / 2;
-          const e = Math.exp((-x * x) / 50);
-          const y =
-            centerY +
-            Math.cos(x * 0.4 - time * 8) * e * height * 0.35 * currentAmplitude;
-          ctx.fillRect(i, Math.round(y), 1, 2);
-        }
-        ctx.fillStyle = interpolateColor(accentColor, muteColor, muteFactor);
-        for (let i = 0; i < width; i++) {
-          const x = i - width / 2;
-          const e = Math.exp((-x * x) / 80);
-          const y =
-            centerY +
-            Math.cos(x * 0.3 - time * 5) * e * height * 0.25 * currentAmplitude;
-          ctx.fillRect(i, Math.round(y), 1, 2);
-        }
-      }
-      this._soundWaveRafId = requestAnimationFrame(animate);
-    };
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && !this._soundWaveRafId) {
-        animate();
-      }
-    });
-    animate();
   }
   /** Collect all image paths from GALLERY_CATEGORIES into this.fashionImages. */
   initImageData() {
@@ -722,7 +362,6 @@ class FashionGallery {
         // Click/tap to zoom — drag detection uses gallery-level isDragging flag
         item.addEventListener("click", () => {
           if (this._isDragging || this._pinchJustEnded || this.zoomState.isActive) return;
-          this.soundSystem.play("click");
           this.enterZoomMode(itemData);
         });
         this.gridContainer.appendChild(item);
@@ -799,7 +438,6 @@ class FashionGallery {
     if (this.zoomState.isActive) return;
     this.zoomState.isActive = true;
     this.zoomState.selectedItem = selectedItemData;
-    this.soundSystem.play("open");
     // Disable dragging
     if (this.draggable) this.draggable.disable();
     document.body.classList.add("zoom-mode");
@@ -912,7 +550,6 @@ class FashionGallery {
       !this.zoomState.scalingOverlay
     )
       return;
-    this.soundSystem.play("close");
     document.removeEventListener("keydown", this._boundHandleZoomKeys);
     const splitLeft = document.getElementById("splitLeft");
     const splitRight = document.getElementById("splitRight");
@@ -1065,7 +702,6 @@ class FashionGallery {
   enterFullscreen(useNative = true) {
     this.zoomState.isFullscreen = true;
     document.body.classList.add("fullscreen-mode");
-    this.soundSystem.play("click");
     if (useNative) {
       document.documentElement.requestFullscreen()
         .then(() => this._repositionOverlayToTarget())
@@ -1078,7 +714,6 @@ class FashionGallery {
     if (!this.zoomState.isFullscreen) return;
     this.zoomState.isFullscreen = false;
     document.body.classList.remove("fullscreen-mode");
-    this.soundSystem.play("click");
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
       // _repositionOverlayToTarget will be called by handleFullscreenChange
@@ -1146,7 +781,6 @@ class FashionGallery {
   }
   navigateZoom(direction) {
     if (!this.zoomState.isActive || !this.zoomState.selectedItem) return;
-    this.soundSystem.playSynth('navClick');
 
     const overlay = this.zoomState.scalingOverlay;
     if (!overlay) return;
@@ -1371,8 +1005,6 @@ class FashionGallery {
     gsap.set(preview, { opacity: 0 });
     if (closeBtn) gsap.set(closeBtn, { opacity: 0, rotate: -90 });
 
-    this.soundSystem.play('liftoff');
-
     const tl = gsap.timeline();
     tl.to(['.header', '.footer'], { opacity: 0, duration: 0.25, ease: 'power2.in' }, 0);
     tl.to(index, { opacity: 1, duration: 0.35, ease: 'power2.out' }, 0.1);
@@ -1384,8 +1016,6 @@ class FashionGallery {
   closeCategoryIndex() {
     const index = document.getElementById('categoryIndex');
     if (!index || !this.indexOpen) return;
-    this.soundSystem.play('land');
-
     const rows = index.querySelectorAll('.category-row');
     const footer = index.querySelector('.category-index-footer');
 
@@ -1427,8 +1057,6 @@ class FashionGallery {
       this.hideIndexPanel();
       return;
     }
-
-    this.soundSystem.play('button');
 
     // Highlight active nav link
     document.querySelectorAll('.category-index-nav a').forEach(a => a.classList.remove('panel-active'));
@@ -1476,8 +1104,6 @@ class FashionGallery {
     const catList = document.getElementById('categoryList');
     const preview = document.getElementById('categoryPreview');
     const activePanel = document.querySelector('.index-panel.active');
-
-    this.soundSystem.play('button');
 
     // Clear nav highlight & hide back-to-top
     document.querySelectorAll('.category-index-nav a').forEach(a => a.classList.remove('panel-active'));
@@ -1847,14 +1473,12 @@ initDraggable() {
       if (!item || this._pinchJustEnded || this.zoomState.isActive) return;
       const itemData = this.gridItems.find(d => d.element === item);
       if (itemData) {
-        this.soundSystem.play("click");
         this.enterZoomMode(itemData);
       }
     },
     onDragStart: () => {
       this._isDragging = true;
       document.body.classList.add("dragging");
-      this.soundSystem.play("drag-start");
       this.lastValidPosition.x = this.draggable.x;
       this.lastValidPosition.y = this.draggable.y;
     },
@@ -1945,9 +1569,6 @@ initDraggable() {
           ".percentage-indicator"
         );
         const switchElement = this.controlsContainer.querySelector(".switch");
-        const soundToggle = this.controlsContainer.querySelector(
-          ".sound-toggle"
-        );
         gsap.set(this.controlsContainer, {
           opacity: 0
         });
@@ -1956,9 +1577,6 @@ initDraggable() {
         });
         gsap.set(switchElement, {
           y: "2em"
-        });
-        gsap.set(soundToggle, {
-          x: "3em"
         });
         const navTimeline = gsap.timeline();
         navTimeline.to(
@@ -1987,15 +1605,6 @@ initDraggable() {
             ease: "power2.out"
           },
           0.3
-        );
-        navTimeline.to(
-          soundToggle,
-          {
-            x: 0,
-            duration: 0.2,
-            ease: "power2.out"
-          },
-          0.35
         );
         this.controlsContainer.classList.add("visible");
       }
@@ -2037,7 +1646,6 @@ initDraggable() {
     this._isAnimating = true;
     const fitZoom = this.calculateFitZoom();
     const newGap = this.calculateGapForZoom(fitZoom);
-    this.soundSystem.play(fitZoom < 0.6 ? "zoom-out" : "zoom-in");
     // Pan to center at the CURRENT scale first, so the grid moves to middle before zooming out
     this.calculateGridDimensions(this.config.currentGap);
     const vw = window.innerWidth;
@@ -2122,7 +1730,6 @@ initDraggable() {
     const newGap = this.calculateGapForZoom(zoomLevel);
     const oldZoom = this.config.currentZoom;
     this.config.currentZoom = zoomLevel;
-    this.soundSystem.play(zoomLevel < oldZoom ? "zoom-out" : "zoom-in");
     this.calculateGridDimensions(this.config.currentGap);
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -2305,7 +1912,6 @@ initDraggable() {
       document.addEventListener("mouseleave", () => this.handleMouseLeave());
       this.viewport.addEventListener("mouseleave", () => this.handleMouseLeave());
     }
-    this.soundToggle.addEventListener("click", () => this.soundSystem.toggle());
     // Category index triggers
     const catLabel = document.getElementById('activeCategoryLabel');
     if (catLabel) catLabel.addEventListener('click', () => this.openCategoryIndex());
@@ -2423,7 +2029,6 @@ function initMobileMenu() {
   }, 1200);
 
   btn.addEventListener("click", () => {
-    if (gallery) gallery.soundSystem.play("liftoff");
     if (gallery && gallery.indexOpen) {
       gallery.closeCategoryIndex();
       btn.classList.remove("open");
@@ -2453,7 +2058,6 @@ function initMobileMenu() {
         }
       } else {
         const href = link.getAttribute('href');
-        if (gallery) gallery.soundSystem.play('liftoff');
         setTimeout(() => { window.location.href = href; }, 300);
       }
     });

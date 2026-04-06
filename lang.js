@@ -46,9 +46,7 @@ const TRANSLATIONS = {
 
     tooltipSplitView: "Split view",
     tooltipTheatreMode: "Theatre mode",
-    tooltipFullscreen: "Fullscreen",
-    tooltipSoundOn: "Sound on",
-    tooltipSoundOff: "Sound off"
+    tooltipFullscreen: "Fullscreen"
   },
   ro: {
     allWork: "Categorii",
@@ -92,9 +90,7 @@ const TRANSLATIONS = {
 
     tooltipSplitView: "Mod split",
     tooltipTheatreMode: "Mod teatru",
-    tooltipFullscreen: "Ecran complet",
-    tooltipSoundOn: "Sunet pornit",
-    tooltipSoundOff: "Sunet oprit"
+    tooltipFullscreen: "Ecran complet"
   }
 };
 
@@ -153,11 +149,6 @@ function updateTooltips() {
     var btn = document.getElementById('vmBtn' + i);
     if (btn) btn.setAttribute('aria-label', window.t(vmKeys[i]));
   });
-  var sound = document.getElementById('soundToggle');
-  if (sound) {
-    var key = sound.classList.contains('active') ? 'tooltipSoundOn' : 'tooltipSoundOff';
-    sound.setAttribute('data-tooltip', window.t(key));
-  }
 }
 
 window.updateTooltips = updateTooltips;

@@ -527,38 +527,6 @@ h3 {
   overflow: hidden;
 }
 
-.sound-toggle {
-  background-color: #f0f0f0;
-  background-image: radial-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 0);
-  background-size: 0.44em 0.44em;
-  background-position: -0.06em -0.06em;
-  padding: 0.5em 0.75em;
-  border-radius: 0.25em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 3.75em;
-  position: relative;
-  border-color: transparent;
-}
-
-.sound-wave-canvas {
-  width: 2em;
-  height: 1em;
-  border: none !important;
-  outline: none !important;
-  background: none !important;
-}
-
-.sound-toggle.active .sound-wave-canvas {
-  opacity: 1;
-}
-
-.sound-toggle:hover .sound-wave-canvas {
-  opacity: 0.8;
-}
 
 .switch-button {
   background: transparent;
@@ -750,13 +718,11 @@ body.fullscreen-mode .controls-container { left: 50%; }
 }
 
 @media (hover: hover) {
-  .vm-btn,
-  .sound-toggle {
+  .vm-btn {
     position: relative;
   }
 
-  .vm-btn::after,
-  .sound-toggle::after {
+  .vm-btn::after {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
@@ -776,16 +742,10 @@ body.fullscreen-mode .controls-container { left: 50%; }
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s ease, transform 0.15s ease;
-  }
-
-  .vm-btn::after {
     content: attr(aria-label);
   }
 
-  .sound-toggle::after { content: attr(data-tooltip); }
-
-  .vm-btn:hover::after,
-  .sound-toggle:hover::after {
+  .vm-btn:hover::after {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
@@ -2072,15 +2032,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
     height: 36px;
   }
 
-  .sound-toggle {
-    padding: 0.4em 0.5em;
-    min-width: 2.75em;
-  }
-
-  .sound-wave-canvas {
-    width: 1.5em;
-    height: 0.75em;
-  }
 
 
   /* Image nav buttons on mobile — bottom row, inline with mute */
