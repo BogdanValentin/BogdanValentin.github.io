@@ -2013,8 +2013,7 @@ body.fullscreen-mode .controls-container { left: 50%; }
     min-width: 3.5em;
   }
 
-  /* Hide zoom/vm controls on gallery home; show only when viewing a photo */
-  .controls-container .switch,
+  /* Hide vm controls and percentage on gallery home; show only when viewing a photo */
   .controls-container .vm-group,
   .controls-container .percentage-indicator {
     display: none;

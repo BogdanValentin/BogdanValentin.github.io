@@ -1386,12 +1386,18 @@ class FashionGallery {
     this.viewport.addEventListener('touchend', (e) => {
       if (e.touches.length < 2 && startDist > 0) {
         startDist = 0;
-        // Suppress the synthetic click the browser fires after a pinch gesture
+        // Mark pinch ended — but don't start the timer yet; the remaining
+        // finger can still trigger GSAP's onClick if it lifts < 400ms later.
         this._pinchJustEnded = true;
-        setTimeout(() => { this._pinchJustEnded = false; }, 400);
+        clearTimeout(this._pinchEndTimer);
         // Finalize: update gap + draggable bounds
         this.finalizeScrollZoom(this.config.currentZoom);
         this.updateZoomButtonHighlight(this.config.currentZoom);
+      }
+      // Only start the suppression countdown once ALL fingers are off the screen.
+      if (e.touches.length === 0 && this._pinchJustEnded) {
+        clearTimeout(this._pinchEndTimer);
+        this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
       }
     }, { passive: true });
   }
