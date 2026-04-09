@@ -223,7 +223,7 @@ class FashionGallery {
       flipAnimation: null,
       scalingOverlay: null
     };
-    this.viewMode = 0; // 0=split, 1=css-fullscreen, 2=native-fullscreen
+    this.viewMode = 1; // 0=split, 1=css-fullscreen, 2=native-fullscreen
     this.gridItems = [];
     this.gridDimensions = {};
     this.lastValidPosition = {
@@ -245,7 +245,7 @@ class FashionGallery {
     document.addEventListener("fullscreenchange", this._boundHandleFullscreenChange);
     // View mode picker buttons
     this.vmGroup = document.getElementById('vmGroup');
-    this.vmGroup.style.setProperty('--vm-active', 0);
+    this.vmGroup.style.setProperty('--vm-active', 1);
     this.vmBtns.forEach((btn, i) => {
       btn.onclick = () => this._setViewMode(i);
     });
@@ -561,6 +561,8 @@ class FashionGallery {
       ease: "expo.out",
     });
     this.controlsContainer.classList.add("split-mode");
+    // Check overlap after controls-container finishes transitioning to split position (1.2s)
+    setTimeout(() => this._checkFooterOverlap(), 1250);
     // Show nav buttons
     this.navPrev.classList.add("active");
     this.navNext.classList.add("active");
@@ -685,8 +687,20 @@ class FashionGallery {
         this.zoomState.isActive = false;
         this.zoomState.selectedItem = null;
         this.zoomState.flipAnimation = null;
+        this._checkFooterOverlap();
       }
     });
+  }
+  _checkFooterOverlap() {
+    const footerRight = document.querySelector('.footer-right');
+    if (!footerRight || !this.vmGroup) return;
+    const vmRect = this.vmGroup.getBoundingClientRect();
+    const footerRect = footerRight.getBoundingClientRect();
+    const overlaps = vmRect.left < footerRect.right + 8 &&
+                     vmRect.right > footerRect.left - 8 &&
+                     vmRect.top < footerRect.bottom + 8 &&
+                     vmRect.bottom > footerRect.top - 8;
+    document.body.classList.toggle('controls-overlap', overlaps);
   }
   handleZoomKeys(e) {
     if (!this.zoomState.isActive) return;
@@ -1852,7 +1866,10 @@ initDraggable() {
 
     window.addEventListener("resize", () => {
       clearTimeout(this._resizeTimer);
-      this._resizeTimer = setTimeout(() => this._handleResize(), 150);
+      this._resizeTimer = setTimeout(() => {
+        this._handleResize();
+        this._checkFooterOverlap();
+      }, 150);
     });
     if (!this.isMobile) {
       document.addEventListener("mouseleave", () => this.handleMouseLeave());

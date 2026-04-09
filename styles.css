@@ -654,6 +654,25 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
 
 
+/* Hide split/theatre buttons when no photo is selected — only fullscreen visible */
+.controls-container.visible:not(.split-mode) #vmBtn0,
+.controls-container.visible:not(.split-mode) #vmBtn1 {
+  display: none;
+}
+.controls-container.visible:not(.split-mode) .vm-group::before {
+  display: none;
+}
+.controls-container.visible:not(.split-mode) #vmBtn2 {
+  border-radius: 0.3em;
+  border-right: none;
+}
+
+/* Hide footer lang/coords when controls overlap them */
+body.controls-overlap .lang-toggle--footer,
+body.controls-overlap .info-section {
+  visibility: hidden;
+}
+
 /* ===== VIEW MODE PICKER ===== */
 
 .vm-group {
