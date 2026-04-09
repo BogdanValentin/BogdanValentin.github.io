@@ -11,10 +11,7 @@
 
 :root {
   --spacing-base: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
   --color-text: #ffffff;
-  --color-text-dim: 0.6;
   --transition-medium: 0.3s ease;
   --font-size-base: 36px;
 
@@ -109,13 +106,6 @@ body.zoom-mode #activeCategoryLabel {
   padding: 5px 10px;
   cursor: pointer;
   transition: color 0.2s;
-}
-
-.lang-flag {
-  display: inline-block;
-  vertical-align: -3px;
-  font-size: 1.1em;
-  line-height: 1;
 }
 
 /* Inside mobile menu */
@@ -1058,6 +1048,7 @@ body.fullscreen-mode .controls-container { left: 50%; }
   overflow-y: auto;
   padding: 1rem 2rem 2rem;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .index-panel.active {
@@ -1788,10 +1779,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
   display: none;
 }
 
-.index-panel {
-  -ms-overflow-style: none;
-}
-
 /* ===== PANEL SCROLL (throttle-up) BUTTON ===== */
 .panel-scroll {
   display: flex;
@@ -1880,18 +1867,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
 .panel-scroll:not(:hover) .panel-rect:nth-child(6) { transition-delay: 0.15s; }
 .panel-scroll:not(:hover) .panel-rect:nth-child(7) { transition-delay: 0.05s; }
 .panel-scroll:not(:hover) .panel-rect:nth-child(8) { transition-delay: 0s; }
-
-@media (max-width: 768px) {
-  /* Progressive lines as you scroll down */
-  .panel-scroll[data-lines] .panel-rect {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  .panel-scroll[data-lines] .panel-rect.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {

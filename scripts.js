@@ -181,10 +181,8 @@ class PreloaderManager {
  *   activeCategory    – current category id ('all' | category slug)
  */
 const CONSTANTS = {
-  ZOOM:      { NORMAL: 0.5, MAX: 1.0 },
+  ZOOM:      { NORMAL: 0.5 },
   GRID:      { WIDTH: 400, HEIGHT: 300, WIDTH_MOBILE: 260, HEIGHT_MOBILE: 195 },
-  GAP:       { LARGE: 64, NORMAL: 32, TIGHT: 16 },
-  ANIMATION: { ZOOM_DURATION: 1.2, FADE_DURATION: 0.8 },
   BREAKPOINT_MOBILE: 768,
   SWIPE_THRESHOLD: 60,
 };
@@ -559,8 +557,6 @@ class FashionGallery {
       scaleY: 1,
       duration: 0.4,
       ease: "expo.out",
-      onComplete: () => {
-      }
     });
     this.controlsContainer.classList.add("split-mode");
     // Show nav buttons
@@ -1821,29 +1817,6 @@ initDraggable() {
     if (buttonElement) {
       buttonElement.classList.add("switch-button-current");
     }
-  }
-  resetPosition() {
-    if (this.zoomState.isActive) {
-      this.exitZoomMode();
-      return;
-    }
-    this.calculateGridDimensions(this.config.currentGap);
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const { scaledWidth, scaledHeight } = this.gridDimensions;
-    const centerX = (vw - scaledWidth) / 2;
-    const centerY = (vh - scaledHeight) / 2;
-    gsap.to(this.canvasWrapper, {
-      duration: 1.0,
-      x: centerX,
-      y: centerY,
-      ease: this.centerEase,
-      onComplete: () => {
-        this.lastValidPosition.x = centerX;
-        this.lastValidPosition.y = centerY;
-        this.initDraggable();
-      }
-    });
   }
   init() {
     this.buildCategoryIndex();
