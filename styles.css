@@ -762,7 +762,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
   font-family: "TheGoodMonolith", monospace;
   font-size: 32px;
   line-height: 1;
-  text-box: trim-both cap alphabetic;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.9);
