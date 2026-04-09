@@ -198,6 +198,7 @@ class FashionGallery {
     this.navNext = document.getElementById("navNext");
     this.controlsContainer = document.getElementById("controlsContainer");
     this.vmBtns = [0, 1, 2].map(i => document.getElementById(`vmBtn${i}`));
+    this._switchButtons = Array.from(document.querySelectorAll(".switch-button"));
     // Create custom eases
     this.customEase = CustomEase.create("smooth", ".87,0,.13,1");
     this.centerEase = CustomEase.create("center", ".25,.46,.45,.94");
@@ -476,6 +477,19 @@ class FashionGallery {
     pre.src = fullSrc;
     return overlay;
   }
+  /**
+   * Returns the largest rect that fits `naturalWidth × naturalHeight` inside
+   * `containerRect` while preserving aspect ratio (CSS object-fit: contain logic).
+   */
+  _containedRect(naturalWidth, naturalHeight, containerRect) {
+    const imageAspect     = naturalWidth / naturalHeight;
+    const containerAspect = containerRect.width / containerRect.height;
+    const width  = imageAspect > containerAspect ? containerRect.width  : containerRect.height * imageAspect;
+    const height = imageAspect > containerAspect ? containerRect.width  / imageAspect : containerRect.height;
+    const left   = containerRect.left + (containerRect.width  - width)  / 2;
+    const top    = containerRect.top  + (containerRect.height - height) / 2;
+    return { width, height, left, top };
+  }
   enterZoomMode(selectedItemData) {
     if (this.zoomState.isActive) return;
     this.zoomState.isActive = true;
@@ -516,37 +530,28 @@ class FashionGallery {
     const cellRect  = selectedItemData.img.getBoundingClientRect();
     const targetRect = zoomTarget.getBoundingClientRect();
 
-    // Derive the image's aspect ratio from naturalWidth/naturalHeight (EXIF-corrected in modern browsers)
-    const natW = selectedItemData.img.naturalWidth  || cellRect.width;
-    const natH = selectedItemData.img.naturalHeight || cellRect.height;
-    const imgAspect = natW / natH;
+    // Derive natural dimensions (EXIF-corrected in modern browsers)
+    const naturalWidth  = selectedItemData.img.naturalWidth  || cellRect.width;
+    const naturalHeight = selectedItemData.img.naturalHeight || cellRect.height;
 
-    // Contained image size within the zoom target — this is where the overlay will end up
-    const tgtAspect = targetRect.width / targetRect.height;
-    const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
-    const fh = imgAspect > tgtAspect ? targetRect.width  / imgAspect : targetRect.height;
-    const fl = targetRect.left + (targetRect.width  - fw) / 2;
-    const ft = targetRect.top  + (targetRect.height - fh) / 2;
+    // Contained image rect within zoom target (final overlay position)
+    const target = this._containedRect(naturalWidth, naturalHeight, targetRect);
 
-    // Contained image size within the grid cell — this is the actual rendered area to start from.
-    // Using the full cellRect would distort portrait images (landscape cell ≠ portrait image rect).
-    const cellAspect = cellRect.width / cellRect.height;
-    const srcW = imgAspect > cellAspect ? cellRect.width  : cellRect.height * imgAspect;
-    const srcH = imgAspect > cellAspect ? cellRect.width  / imgAspect : cellRect.height;
-    const srcL = cellRect.left + (cellRect.width  - srcW) / 2;
-    const srcT = cellRect.top  + (cellRect.height - srcH) / 2;
+    // Contained image rect within grid cell — actual rendered content area to animate FROM.
+    // Using the raw cellRect would distort portrait images (landscape cell ≠ portrait image rect).
+    const source = this._containedRect(naturalWidth, naturalHeight, cellRect);
 
     // Set overlay to final size/position, use transforms to start from the source image content rect
     gsap.set(overlay, {
-      left: fl,
-      top: ft,
-      width: fw,
-      height: fh,
+      left: target.left,
+      top: target.top,
+      width: target.width,
+      height: target.height,
       transformOrigin: "top left",
-      x: srcL - fl,
-      y: srcT - ft,
-      scaleX: srcW / fw,
-      scaleY: srcH / fh,
+      x: source.left - target.left,
+      y: source.top  - target.top,
+      scaleX: source.width  / target.width,
+      scaleY: source.height / target.height,
     });
 
     // Animate only transforms — no layout thrashing
@@ -630,16 +635,11 @@ class FashionGallery {
     const currentVisualRect = overlay.getBoundingClientRect();
     const thumbRect = selectedElement.getBoundingClientRect();
 
-    // Compute the contained image rect within the cell (mirrors enterZoomMode srcW/srcH calc).
+    // Compute the contained image rect within the cell (mirrors enterZoomMode source calc).
     // Using the raw thumbRect would distort images whose aspect ratio differs from the cell's.
-    const natW = selectedImg.naturalWidth  || thumbRect.width;
-    const natH = selectedImg.naturalHeight || thumbRect.height;
-    const imgAspect = natW / natH;
-    const cellAspect = thumbRect.width / thumbRect.height;
-    const srcW = imgAspect > cellAspect ? thumbRect.width  : thumbRect.height * imgAspect;
-    const srcH = imgAspect > cellAspect ? thumbRect.width  / imgAspect : thumbRect.height;
-    const srcL = thumbRect.left + (thumbRect.width  - srcW) / 2;
-    const srcT = thumbRect.top  + (thumbRect.height - srcH) / 2;
+    const naturalWidth  = selectedImg.naturalWidth  || thumbRect.width;
+    const naturalHeight = selectedImg.naturalHeight || thumbRect.height;
+    const source = this._containedRect(naturalWidth, naturalHeight, thumbRect);
 
     // Clear transforms to read the overlay's base layout position
     gsap.set(overlay, { clearProps: "x,y,scaleX,scaleY,scale" });
@@ -649,17 +649,17 @@ class FashionGallery {
     gsap.set(overlay, {
       transformOrigin: "top left",
       x: currentVisualRect.left - baseRect.left,
-      y: currentVisualRect.top - baseRect.top,
-      scaleX: currentVisualRect.width / baseRect.width,
+      y: currentVisualRect.top  - baseRect.top,
+      scaleX: currentVisualRect.width  / baseRect.width,
       scaleY: currentVisualRect.height / baseRect.height,
     });
 
     // Animate transforms to thumbnail position — no layout thrashing
     gsap.to(overlay, {
-      x: srcL - baseRect.left,
-      y: srcT - baseRect.top,
-      scaleX: srcW / baseRect.width,
-      scaleY: srcH / baseRect.height,
+      x: source.left - baseRect.left,
+      y: source.top  - baseRect.top,
+      scaleX: source.width  / baseRect.width,
+      scaleY: source.height / baseRect.height,
       duration: 0.4,
       ease: "expo.in",
       onComplete: () => {
@@ -791,24 +791,19 @@ class FashionGallery {
       const zoomTarget = document.getElementById('zoomTarget');
       const targetRect = zoomTarget.getBoundingClientRect();
       const img = overlay.querySelector('img');
-      const natW = img.naturalWidth || targetRect.width;
-      const natH = img.naturalHeight || targetRect.height;
-      const imgAspect = natW / natH;
-      const tgtAspect = targetRect.width / targetRect.height;
-      const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
-      const fh = imgAspect > tgtAspect ? targetRect.width / imgAspect : targetRect.height;
-      const fl = targetRect.left + (targetRect.width  - fw) / 2;
-      const ft = targetRect.top  + (targetRect.height - fh) / 2;
+      const naturalWidth  = img.naturalWidth  || targetRect.width;
+      const naturalHeight = img.naturalHeight || targetRect.height;
+      const contained = this._containedRect(naturalWidth, naturalHeight, targetRect);
       gsap.set(overlay, {
-        left: fl,
-        top: ft,
-        width: fw,
-        height: fh,
+        left: contained.left,
+        top: contained.top,
+        width: contained.width,
+        height: contained.height,
         transformOrigin: 'top left',
-        x: currentVisualRect.left - fl,
-        y: currentVisualRect.top - ft,
-        scaleX: currentVisualRect.width / fw,
-        scaleY: currentVisualRect.height / fh,
+        x: currentVisualRect.left - contained.left,
+        y: currentVisualRect.top  - contained.top,
+        scaleX: currentVisualRect.width  / contained.width,
+        scaleY: currentVisualRect.height / contained.height,
       });
       gsap.to(overlay, {
         x: 0, y: 0, scaleX: 1, scaleY: 1,
@@ -876,16 +871,11 @@ class FashionGallery {
           // Without this, a portrait image keeps the previous landscape overlay and the
           // border frames empty space.
           const zoomTarget = document.getElementById('zoomTarget');
-          const targetRect  = zoomTarget.getBoundingClientRect();
-          const natW = thumbPre.naturalWidth  || targetRect.width;
-          const natH = thumbPre.naturalHeight || targetRect.height;
-          const imgAspect = natW / natH;
-          const tgtAspect = targetRect.width / targetRect.height;
-          const fw = imgAspect > tgtAspect ? targetRect.width  : targetRect.height * imgAspect;
-          const fh = imgAspect > tgtAspect ? targetRect.width  / imgAspect : targetRect.height;
-          const fl = targetRect.left + (targetRect.width  - fw) / 2;
-          const ft = targetRect.top  + (targetRect.height - fh) / 2;
-          gsap.set(overlay, { left: fl, top: ft, width: fw, height: fh, x: 0, y: 0 });
+          const targetRect    = zoomTarget.getBoundingClientRect();
+          const naturalWidth  = thumbPre.naturalWidth  || targetRect.width;
+          const naturalHeight = thumbPre.naturalHeight || targetRect.height;
+          const contained = this._containedRect(naturalWidth, naturalHeight, targetRect);
+          gsap.set(overlay, { left: contained.left, top: contained.top, width: contained.width, height: contained.height, x: 0, y: 0 });
 
           img.src = thumbSrc;
           gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' });
@@ -1291,7 +1281,7 @@ class FashionGallery {
 
       if (newZoom === oldTargetZoom) return;
 
-      document.querySelectorAll(".switch-button").forEach((btn) => btn.classList.remove("switch-button-current"));
+      this._switchButtons.forEach((btn) => btn.classList.remove("switch-button-current"));
 
       // Read current animated position via GSAP (avoids forced reflow)
       const currentX = gsap.getProperty(this.canvasWrapper, 'x');
@@ -1344,6 +1334,24 @@ class FashionGallery {
     this.calculateGridDimensions(this.config.currentGap);
     this.initDraggable();
   }
+  /**
+   * Animates grid items and canvas wrapper to a new gap size.
+   * No-op if the gap hasn't changed.
+   */
+  _animateGapTransition(newGap, duration = 1.0) {
+    if (newGap === this.config.currentGap) return;
+    this.gridItems.forEach((itemData) => {
+      const newX = itemData.col * (this.config.itemWidth + newGap);
+      const newY = itemData.row * (this.config.itemHeight + newGap);
+      itemData.baseX = newX;
+      itemData.baseY = newY;
+      gsap.to(itemData.element, { duration, left: newX, top: newY, ease: this.customEase });
+    });
+    const newWidth  = this.config.cols * (this.config.itemWidth  + newGap) - newGap;
+    const newHeight = this.config.rows * (this.config.itemHeight + newGap) - newGap;
+    gsap.to(this.canvasWrapper, { duration, width: newWidth, height: newHeight, ease: this.customEase });
+    this.config.currentGap = newGap;
+  }
   /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0, zooms toward pinch midpoint. */
   initPinchZoom() {
     let startDist = 0;
@@ -1379,7 +1387,7 @@ class FashionGallery {
       if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0 || this._isAnimating) return;
       e.preventDefault();
 
-      document.querySelectorAll(".switch-button").forEach((btn) => btn.classList.remove("switch-button-current"));
+      this._switchButtons.forEach((btn) => btn.classList.remove("switch-button-current"));
 
       const dist = getDistance(e.touches);
       const fitZoom = this.calculateFitZoom();
@@ -1662,6 +1670,7 @@ initDraggable() {
     }
     this._isAnimating = true;
     if (this.draggable) this.draggable.disable();
+    gsap.killTweensOf(this.canvasWrapper);
     const fitZoom = this.calculateFitZoom();
     const newGap = this.calculateGapForZoom(fitZoom);
     // Pan to center at the CURRENT scale first, so the grid moves to middle before zooming out
@@ -1680,31 +1689,7 @@ initDraggable() {
       onComplete: () => {
         this.config.currentZoom = fitZoom;
         this._targetZoom = fitZoom;
-        if (newGap !== this.config.currentGap) {
-          this.gridItems.forEach((itemData) => {
-            const newX = itemData.col * (this.config.itemWidth + newGap);
-            const newY = itemData.row * (this.config.itemHeight + newGap);
-            itemData.baseX = newX;
-            itemData.baseY = newY;
-            gsap.to(itemData.element, {
-              duration: 1.0,
-              left: newX,
-              top: newY,
-              ease: this.customEase
-            });
-          });
-          const newWidth =
-            this.config.cols * (this.config.itemWidth + newGap) - newGap;
-          const newHeight =
-            this.config.rows * (this.config.itemHeight + newGap) - newGap;
-          gsap.to(this.canvasWrapper, {
-            duration: 1.0,
-            width: newWidth,
-            height: newHeight,
-            ease: this.customEase
-          });
-          this.config.currentGap = newGap;
-        }
+        this._animateGapTransition(newGap, 1.0);
         this.calculateGridDimensions(newGap);
         const finalScaledWidth = this.gridDimensions.width * fitZoom;
         const finalScaledHeight = this.gridDimensions.height * fitZoom;
@@ -1726,9 +1711,7 @@ initDraggable() {
       }
     });
     this.updatePercentageIndicator(fitZoom);
-    document.querySelectorAll(".switch-button").forEach((btn) => {
-      btn.classList.remove("switch-button-current");
-    });
+    this._switchButtons.forEach((btn) => btn.classList.remove("switch-button-current"));
     if (buttonElement) {
       buttonElement.classList.add("switch-button-current");
     }
@@ -1747,6 +1730,7 @@ initDraggable() {
     }
     this._isAnimating = true;
     if (this.draggable) this.draggable.disable();
+    gsap.killTweensOf(this.canvasWrapper);
     const newGap = this.calculateGapForZoom(zoomLevel);
     const oldZoom = this.config.currentZoom;
     this.config.currentZoom = zoomLevel;
@@ -1764,31 +1748,7 @@ initDraggable() {
       y: centerY,
       ease: this.centerEase,
       onComplete: () => {
-        if (newGap !== this.config.currentGap) {
-          this.gridItems.forEach((itemData) => {
-            const newX = itemData.col * (this.config.itemWidth + newGap);
-            const newY = itemData.row * (this.config.itemHeight + newGap);
-            itemData.baseX = newX;
-            itemData.baseY = newY;
-            gsap.to(itemData.element, {
-              duration: 1.2,
-              left: newX,
-              top: newY,
-              ease: this.customEase
-            });
-          });
-          const newWidth =
-            this.config.cols * (this.config.itemWidth + newGap) - newGap;
-          const newHeight =
-            this.config.rows * (this.config.itemHeight + newGap) - newGap;
-          gsap.to(this.canvasWrapper, {
-            duration: 1.2,
-            width: newWidth,
-            height: newHeight,
-            ease: this.customEase
-          });
-          this.config.currentGap = newGap;
-        }
+        this._animateGapTransition(newGap, 1.2);
         this.calculateGridDimensions(newGap);
         const finalScaledWidth = this.gridDimensions.width * zoomLevel;
         const finalScaledHeight = this.gridDimensions.height * zoomLevel;
@@ -1811,9 +1771,7 @@ initDraggable() {
       }
     });
     this.updatePercentageIndicator(zoomLevel);
-    document.querySelectorAll(".switch-button").forEach((btn) => {
-      btn.classList.remove("switch-button-current");
-    });
+    this._switchButtons.forEach((btn) => btn.classList.remove("switch-button-current"));
     if (buttonElement) {
       buttonElement.classList.add("switch-button-current");
     }
