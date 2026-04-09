@@ -181,7 +181,7 @@ class PreloaderManager {
  *   activeCategory    – current category id ('all' | category slug)
  */
 const CONSTANTS = {
-  ZOOM:      { NORMAL: 0.6, MAX: 1.0 },
+  ZOOM:      { NORMAL: 0.5, MAX: 1.0 },
   GRID:      { WIDTH: 400, HEIGHT: 300, WIDTH_MOBILE: 260, HEIGHT_MOBILE: 195 },
   GAP:       { LARGE: 64, NORMAL: 32, TIGHT: 16 },
   ANIMATION: { ZOOM_DURATION: 1.2, FADE_DURATION: 0.8 },
@@ -212,7 +212,7 @@ class FashionGallery {
       baseGap: this.isMobile ? 10 : 16,
       rows: 8, // will be set below
       cols: 12, // will be set below
-      currentZoom: this.isMobile ? 0.5 : 0.6,
+      currentZoom: this.isMobile ? 0.4 : 0.5,
       currentGap: this.isMobile ? 20 : 32
     };
     this.setGridShape();
@@ -341,7 +341,7 @@ class FashionGallery {
       else return 40;
     }
     if (zoomLevel >= 1.0) return 16;
-    else if (zoomLevel >= 0.6) return 32;
+    else if (zoomLevel >= 0.5) return 32;
     else return 64;
   }
   calculateGridDimensions(gap = this.config.currentGap) {
@@ -720,7 +720,16 @@ class FashionGallery {
     if (mode !== 2 && mode !== prev && document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
-    if (!this.zoomState.isActive) return;
+    if (!this.zoomState.isActive) {
+      if (mode === 2) {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      return;
+    }
     if (mode === prev) return;
     if (mode === 0) {
       this.exitFullscreen();
@@ -1271,7 +1280,7 @@ class FashionGallery {
 
     this.viewport.addEventListener("wheel", (e) => {
       // Skip when in split-screen zoom mode or on mobile
-      if (this.zoomState.isActive || this.isMobile) return;
+      if (this.zoomState.isActive || this.isMobile || this._isAnimating) return;
       e.preventDefault();
 
       const fitZoom = this.calculateFitZoom();
@@ -1356,6 +1365,7 @@ class FashionGallery {
     // so _pinchJustEnded is true before GSAP's tap detection runs.
     this.viewport.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
+        if (this._isAnimating) return;
         this._pinchActive = true;
         this._pinchJustEnded = true;
         clearTimeout(this._pinchEndTimer);
@@ -1370,7 +1380,7 @@ class FashionGallery {
     }, { capture: true, passive: true });
 
     this.viewport.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0) return;
+      if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0 || this._isAnimating) return;
       e.preventDefault();
 
       document.querySelectorAll(".switch-button").forEach((btn) => btn.classList.remove("switch-button-current"));
@@ -1655,6 +1665,7 @@ initDraggable() {
       return;
     }
     this._isAnimating = true;
+    if (this.draggable) this.draggable.disable();
     const fitZoom = this.calculateFitZoom();
     const newGap = this.calculateGapForZoom(fitZoom);
     // Pan to center at the CURRENT scale first, so the grid moves to middle before zooming out
@@ -1739,6 +1750,7 @@ initDraggable() {
       return;
     }
     this._isAnimating = true;
+    if (this.draggable) this.draggable.disable();
     const newGap = this.calculateGapForZoom(zoomLevel);
     const oldZoom = this.config.currentZoom;
     this.config.currentZoom = zoomLevel;
@@ -1838,7 +1850,7 @@ initDraggable() {
 
     // Sync item dimensions to actual viewport before generating the grid
     this._updateConfigForViewport();
-    // Always start at NORMAL zoom (0.6) so the NORMAL button is highlighted
+    // Always start at NORMAL zoom (0.5) so the NORMAL button is highlighted
     this.config.currentZoom = CONSTANTS.ZOOM.NORMAL;
     // Set grid shape based on aspect ratio and image count
     this.setGridShape();
@@ -1948,7 +1960,7 @@ initDraggable() {
       if (this.zoomState.isActive || this.indexOpen) return;
       switch (e.key) {
         case "1":
-          this.setZoom(0.6);
+          this.setZoom(0.5);
           break;
         case "2":
           this.setZoom(1.0);
