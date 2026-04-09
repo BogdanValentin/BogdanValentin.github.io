@@ -389,6 +389,8 @@ class FashionGallery {
         const img = document.createElement("img");
         img.src = this.toThumbPath(imageUrl);
         img.alt = `Fashion Portrait ${imageIndex}`;
+        img.loading = "lazy";
+        img.decoding = "async";
         img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
         if (img.complete) img.classList.add('loaded');
         item.appendChild(img);
@@ -402,11 +404,6 @@ class FashionGallery {
           imageUrl: imageUrl,
           index: this.gridItems.length
         };
-        // Click/tap to zoom — drag detection uses gallery-level isDragging flag
-        item.addEventListener("click", () => {
-          if (this._isDragging || this._pinchJustEnded || this.zoomState.isActive) return;
-          this.enterZoomMode(itemData);
-        });
         this.gridContainer.appendChild(item);
         this.gridItems.push(itemData);
       }
@@ -1584,9 +1581,8 @@ initDraggable() {
       });
     });
 
-    // Each item gets a random delay and random duration
-    const tl = gsap.timeline({
-      onComplete: () => {
+    // onComplete fires after all items have faded in
+    const onIntroComplete = () => {
         // Re-enable viewport observer only after intro animation finishes
         this.setupViewportObserver();
         // Show controls with staggered animation
@@ -1632,8 +1628,7 @@ initDraggable() {
           0.3
         );
         this.controlsContainer.classList.add("visible");
-      }
-    });
+    };
 
     // Calculate distance from grid center for each item (0 = center, 1 = edge)
     const rows = this.config.rows;
@@ -1642,25 +1637,30 @@ initDraggable() {
     const centerCol = (cols - 1) / 2;
     const maxDist = Math.sqrt(centerRow * centerRow + centerCol * centerCol) || 1;
 
-    const items = this.gridItems.map((itemData) => {
-      const dist = Math.sqrt((itemData.row - centerRow) ** 2 + (itemData.col - centerCol) ** 2);
-      const normDist = dist / maxDist; // 0 = center, 1 = corner
-      return { itemData, normDist };
+    // Pre-compute per-item delay and duration based on distance from center + jitter
+    let maxFinish = 0;
+    const elements  = [];
+    const delays    = [];
+    const durations = [];
+    this.gridItems.forEach((itemData) => {
+      const dist     = Math.sqrt((itemData.row - centerRow) ** 2 + (itemData.col - centerCol) ** 2);
+      const normDist = dist / maxDist;
+      const delay    = Math.max(0, normDist * 2.0 + (Math.random() - 0.5) * 0.3);
+      const dur      = 0.5 + normDist * 0.4 + Math.random() * 0.2;
+      elements.push(itemData.element);
+      delays.push(delay);
+      durations.push(dur);
+      if (delay + dur > maxFinish) maxFinish = delay + dur;
     });
 
-    // Smooth wave from center to edges — each item's delay is proportional to distance
-    // with a small per-item jitter so it feels organic, not mechanical
-    items.forEach(({ itemData, normDist }) => {
-      const baseDelay = normDist * 2.0; // smooth spread across 2s
-      const jitter = (Math.random() - 0.5) * 0.3; // ±0.15s wobble
-      const delay = Math.max(0, baseDelay + jitter);
-      const dur = 0.5 + normDist * 0.4 + Math.random() * 0.2; // center fades faster, edges slower
-      tl.to(itemData.element, {
-        opacity: 1,
-        duration: dur,
-        ease: "sine.out"
-      }, delay);
+    // Single gsap.to with a stagger function — one tween object instead of N timeline entries
+    gsap.to(elements, {
+      opacity: 1,
+      duration: (i) => durations[i],
+      ease: "sine.out",
+      stagger: (i) => delays[i],
     });
+    gsap.delayedCall(maxFinish, onIntroComplete);
   }
   autoFitZoom(buttonElement = null) {
     if (this._isAnimating) return;
@@ -1841,6 +1841,15 @@ initDraggable() {
     });
   }
   setupEventListeners() {
+    // Single delegated click handler for grid items — covers the window before Draggable init
+    this.gridContainer.addEventListener("click", (e) => {
+      if (this._isDragging || this._pinchJustEnded || this.zoomState.isActive) return;
+      const item = e.target.closest(".grid-item");
+      if (!item) return;
+      const itemData = this.gridItems.find(d => d.element === item);
+      if (itemData) this.enterZoomMode(itemData);
+    });
+
     window.addEventListener("resize", () => {
       clearTimeout(this._resizeTimer);
       this._resizeTimer = setTimeout(() => this._handleResize(), 150);
