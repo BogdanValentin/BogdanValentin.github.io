@@ -315,7 +315,6 @@ class FashionGallery {
     this.initDraggable();
     this.setupViewportObserver();
     this.updatePercentageIndicator(fitZoom);
-    this.updateZoomButtonHighlight(fitZoom);
   }
   /** Collect all image paths from GALLERY_CATEGORIES into this.fashionImages. */
   initImageData() {
@@ -1259,7 +1258,6 @@ class FashionGallery {
         this.initDraggable();
         // Update zoom UI to reflect the new fit zoom
         this.updatePercentageIndicator(fitZoom);
-        this.updateZoomButtonHighlight(fitZoom);
       }
     });
   }
@@ -1286,11 +1284,9 @@ class FashionGallery {
       let newZoom = oldTargetZoom - e.deltaY * zoomSpeed;
       newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
 
-      // If at or below fit zoom, snap to center so the grid can't drift out of bounds
-      if (newZoom <= fitZoom + 0.01) {
-        newZoom = fitZoom;
-      }
       if (newZoom === oldTargetZoom) return;
+
+      document.querySelectorAll(".switch-button").forEach((btn) => btn.classList.remove("switch-button-current"));
 
       // Read current animated position via GSAP (avoids forced reflow)
       const currentX = gsap.getProperty(this.canvasWrapper, 'x');
@@ -1331,7 +1327,6 @@ class FashionGallery {
       });
 
       this.updatePercentageIndicator(newZoom);
-      this.updateZoomButtonHighlight(newZoom);
 
       // Debounce the heavier work (gap changes, bounds recalc)
       clearTimeout(this._scrollZoomDebounce);
@@ -1341,49 +1336,8 @@ class FashionGallery {
     }, { passive: false });
   }
   finalizeScrollZoom(zoomLevel) {
-    const newGap = this.calculateGapForZoom(zoomLevel);
-
-    if (newGap !== this.config.currentGap) {
-      // Batch all position updates into a single GSAP timeline for better perf
-      const tl = gsap.timeline({ defaults: { duration: 0.8, ease: this.customEase } });
-
-      // Prepare position arrays for batch animation
-      const elements = [];
-      const xValues = [];
-      const yValues = [];
-      this.gridItems.forEach((itemData) => {
-        const newX = itemData.col * (this.config.itemWidth + newGap);
-        const newY = itemData.row * (this.config.itemHeight + newGap);
-        itemData.baseX = newX;
-        itemData.baseY = newY;
-        elements.push(itemData.element);
-        xValues.push(newX);
-        yValues.push(newY);
-      });
-
-      // Single batched tween for all grid items
-      tl.to(elements, {
-        left: (i) => xValues[i],
-        top: (i) => yValues[i],
-        duration: 0.8,
-        ease: this.customEase
-      }, 0);
-
-      const newWidth = this.config.cols * (this.config.itemWidth + newGap) - newGap;
-      const newHeight = this.config.rows * (this.config.itemHeight + newGap) - newGap;
-      tl.to(this.canvasWrapper, {
-        width: newWidth,
-        height: newHeight,
-        onComplete: () => {
-          this.config.currentGap = newGap;
-          this.calculateGridDimensions(newGap);
-          this.initDraggable();
-        }
-      }, 0);
-    } else {
-      this.calculateGridDimensions(newGap);
-      this.initDraggable();
-    }
+    this.calculateGridDimensions(this.config.currentGap);
+    this.initDraggable();
   }
   /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0, zooms toward pinch midpoint. */
   initPinchZoom() {
@@ -1418,6 +1372,8 @@ class FashionGallery {
     this.viewport.addEventListener('touchmove', (e) => {
       if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0) return;
       e.preventDefault();
+
+      document.querySelectorAll(".switch-button").forEach((btn) => btn.classList.remove("switch-button-current"));
 
       const dist = getDistance(e.touches);
       const fitZoom = this.calculateFitZoom();
@@ -1457,7 +1413,6 @@ class FashionGallery {
         clearTimeout(this._pinchEndTimer);
         e.preventDefault();
         this.finalizeScrollZoom(this.config.currentZoom);
-        this.updateZoomButtonHighlight(this.config.currentZoom);
       }
       if (e.touches.length === 0) {
         this._pinchActive = false;
@@ -1468,21 +1423,6 @@ class FashionGallery {
         }
       }
     }, { passive: false });
-  }
-  updateZoomButtonHighlight(zoomLevel) {
-    const buttons = document.querySelectorAll(".switch-button");
-    buttons.forEach((btn) => btn.classList.remove("switch-button-current"));
-    // Highlight the closest preset button
-    // buttons: [0]=NORMAL(0.6), [1]=ZOOM IN(1.0), [2]=FIT
-    const presets = [0.6, 1.0];
-    const tolerance = 0.05;
-    for (let i = 0; i < presets.length; i++) {
-      if (Math.abs(zoomLevel - presets[i]) < tolerance) {
-        buttons[i]?.classList.add("switch-button-current");
-        return;
-      }
-    }
-    // No preset matched — no button highlighted
   }
   calculateBounds() {
     const vw = window.innerWidth;
@@ -1732,6 +1672,7 @@ initDraggable() {
       ease: this.centerEase,
       onComplete: () => {
         this.config.currentZoom = fitZoom;
+        this._targetZoom = fitZoom;
         if (newGap !== this.config.currentGap) {
           this.gridItems.forEach((itemData) => {
             const newX = itemData.col * (this.config.itemWidth + newGap);
@@ -1801,6 +1742,7 @@ initDraggable() {
     const newGap = this.calculateGapForZoom(zoomLevel);
     const oldZoom = this.config.currentZoom;
     this.config.currentZoom = zoomLevel;
+    this._targetZoom = zoomLevel;
     this.calculateGridDimensions(this.config.currentGap);
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -1866,12 +1808,6 @@ initDraggable() {
     });
     if (buttonElement) {
       buttonElement.classList.add("switch-button-current");
-    } else {
-      const buttons = document.querySelectorAll(".switch-button");
-      if (zoomLevel === 0.6)
-        buttons[0].classList.add("switch-button-current");
-      else if (zoomLevel === 1.0)
-        buttons[1].classList.add("switch-button-current");
     }
   }
   resetPosition() {
@@ -1928,7 +1864,6 @@ initDraggable() {
     this.lastValidPosition.x = centerX;
     this.lastValidPosition.y = centerY;
     this.updatePercentageIndicator(this.config.currentZoom);
-    this.updateZoomButtonHighlight(this.config.currentZoom);
 
     // Setup event listeners
     this.setupEventListeners();
