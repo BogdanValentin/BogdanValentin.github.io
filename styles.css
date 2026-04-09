@@ -108,6 +108,13 @@ body.zoom-mode #activeCategoryLabel {
   transition: color 0.2s;
 }
 
+.lang-flag {
+  display: inline-block;
+  vertical-align: -3px;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
 /* Inside mobile menu */
 .lang-toggle--menu {
   grid-column: unset;
