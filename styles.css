@@ -1177,29 +1177,6 @@ body.fullscreen-mode .controls-container { left: 50%; }
 /* ── File sections ───────────────────────────────── */
 .ab-file {
   margin-bottom: 2.5rem;
-  padding-left: 1.25rem;
-  border-left: 1px solid rgba(166, 75, 35, 0.2);
-  position: relative;
-}
-
-.ab-file::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 0;
-  width: 1px;
-  height: 0;
-  background: rgba(166, 75, 35, 0.8);
-  animation: abFileLine 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.ab-file:nth-child(1)::before { animation-delay: 0s; }
-.ab-file:nth-child(2)::before { animation-delay: 0.15s; }
-.ab-file:nth-child(3)::before { animation-delay: 0.3s; }
-
-@keyframes abFileLine {
-  from { height: 0; }
-  to   { height: 100%; }
 }
 
 .ab-file-header {
