@@ -159,6 +159,9 @@ function updateButton() {
   var html = '<span class="lang-flag">' + flag + '</span> ' + code;
   document.querySelectorAll('.lang-toggle').forEach(function(btn) {
     btn.innerHTML = html;
+    if (typeof twemoji !== 'undefined') {
+      twemoji.parse(btn, { folder: 'svg', ext: '.svg' });
+    }
   });
 }
 
