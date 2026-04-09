@@ -238,6 +238,9 @@ class FashionGallery {
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
+    this._aspectCache = new Map(); // thumbUrl → aspectRatio
+    this._masonryTotalWidth  = 0;
+    this._masonryTotalHeight = 0;
     // Bound event handler references (so removeEventListener works)
     this._boundHandleSplitAreaClick = this.handleSplitAreaClick.bind(this);
     this._boundHandleZoomKeys = this.handleZoomKeys.bind(this);
@@ -344,70 +347,93 @@ class FashionGallery {
     else return 64;
   }
   calculateGridDimensions(gap = this.config.currentGap) {
-    const totalWidth = this.config.cols * (this.config.itemWidth + gap) - gap;
-    const totalHeight = this.config.rows * (this.config.itemHeight + gap) - gap;
+    const layout = this._masonryLayout(gap);
     this.gridDimensions = {
-      width: totalWidth,
-      height: totalHeight,
-      scaledWidth: totalWidth * this.config.currentZoom,
-      scaledHeight: totalHeight * this.config.currentZoom,
-      gap: gap
+      width:        layout.totalWidth,
+      height:       layout.totalHeight,
+      scaledWidth:  layout.totalWidth  * this.config.currentZoom,
+      scaledHeight: layout.totalHeight * this.config.currentZoom,
+      gap
     };
     return this.gridDimensions;
   }
   generateGridItems() {
     this.config.currentGap = this.calculateGapForZoom(this.config.currentZoom);
-    this.calculateGridDimensions();
-    this.canvasWrapper.style.width = this.gridDimensions.width + "px";
-    this.canvasWrapper.style.height = this.gridDimensions.height + "px";
-    this.gridContainer.innerHTML = "";
+    const gap    = this.config.currentGap;
+    const layout = this._masonryLayout(gap);
+
+    this.canvasWrapper.style.width  = layout.totalWidth  + 'px';
+    this.canvasWrapper.style.height = layout.totalHeight + 'px';
+    this.gridContainer.innerHTML = '';
     this.gridItems = [];
+    this._masonryTotalWidth  = layout.totalWidth;
+    this._masonryTotalHeight = layout.totalHeight;
 
-    let imageIndex = 0;
-    for (let row = 0; row < this.config.rows; row++) {
-      for (let col = 0; col < this.config.cols; col++) {
-        const item = document.createElement("div");
-        item.className = "grid-item";
-        item.style.width = this.config.itemWidth + "px";
-        item.style.height = this.config.itemHeight + "px";
+    this.fashionImages.forEach((imageUrl, i) => {
+      const { x, y, height, col } = layout.items[i];
+      const item = document.createElement('div');
+      item.className  = 'grid-item';
+      item.style.width   = this.config.itemWidth + 'px';
+      item.style.height  = height + 'px';
+      item.style.left    = x + 'px';
+      item.style.top     = y + 'px';
+      item.style.opacity = '0';
 
-        // Calculate final grid position
-        const x = col * (this.config.itemWidth + this.config.currentGap);
-        const y = row * (this.config.itemHeight + this.config.currentGap);
-
-        // Set to grid position
-        item.style.left = `${x}px`;
-        item.style.top = `${y}px`;
-
-        // Hide initially - will be positioned and shown in playIntroAnimation
-        item.style.opacity = "0";
-
-        const imageUrl = this.fashionImages[
-          imageIndex % this.fashionImages.length
-        ];
-        imageIndex++;
-        const img = document.createElement("img");
-        img.src = this.toThumbPath(imageUrl);
-        img.alt = `Fashion Portrait ${imageIndex}`;
-        img.loading = "lazy";
-        img.decoding = "async";
-        img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
-        if (img.complete) img.classList.add('loaded');
-        item.appendChild(img);
-        const itemData = {
-          element: item,
-          img: img,
-          row: row,
-          col: col,
-          baseX: x,
-          baseY: y,
-          imageUrl: imageUrl,
-          index: this.gridItems.length
-        };
-        this.gridContainer.appendChild(item);
-        this.gridItems.push(itemData);
+      const thumbUrl = this.toThumbPath(imageUrl);
+      const img      = document.createElement('img');
+      img.src      = thumbUrl;
+      img.alt      = `Photo ${i + 1}`;
+      img.loading  = 'lazy';
+      img.decoding = 'async';
+      img.addEventListener('load', () => {
+        img.classList.add('loaded');
+        if (img.naturalWidth && img.naturalHeight) {
+          const ratio = img.naturalWidth / img.naturalHeight;
+          if (this._aspectCache.get(thumbUrl) !== ratio) {
+            this._aspectCache.set(thumbUrl, ratio);
+            this._scheduleMasonryRecompute();
+          }
+        }
+      }, { once: true });
+      if (img.complete && img.naturalWidth) {
+        img.classList.add('loaded');
+        this._aspectCache.set(thumbUrl, img.naturalWidth / img.naturalHeight);
       }
-    }
+
+      item.appendChild(img);
+      this.gridContainer.appendChild(item);
+
+      this.gridItems.push({
+        element:        item,
+        img:            img,
+        row:            Math.floor(i / this.config.cols), // approximate for distance calc
+        col:            col,
+        baseX:          x,
+        baseY:          y,
+        imageUrl:       imageUrl,
+        index:          i,
+        _masonryHeight: height
+      });
+    });
+  }
+  _masonryLayout(gap) {
+    const cols     = this.config.cols;
+    const colWidth = this.config.itemWidth;
+    const colH     = new Array(cols).fill(0);
+    const items    = this.fashionImages.map((url) => {
+      const thumbUrl = this.toThumbPath(url);
+      const ratio    = this._aspectCache.get(thumbUrl) || (4 / 3);
+      const height   = Math.round(colWidth / ratio);
+      let col = 0;
+      for (let c = 1; c < cols; c++) { if (colH[c] < colH[col]) col = c; }
+      const x = col * (colWidth + gap);
+      const y = colH[col];
+      colH[col] += height + gap;
+      return { x, y, height, col };
+    });
+    const totalWidth  = cols * (colWidth + gap) - gap;
+    const totalHeight = colH.length ? Math.max(...colH) - gap : 0;
+    return { items, totalWidth, totalHeight };
   }
   setupViewportObserver() {
     if (this.viewportObserver) {
@@ -701,6 +727,33 @@ class FashionGallery {
                      vmRect.top < footerRect.bottom + 8 &&
                      vmRect.bottom > footerRect.top - 8;
     document.body.classList.toggle('controls-overlap', overlaps);
+  }
+  _scheduleMasonryRecompute() {
+    if (this._masonryRecomputeTimer) clearTimeout(this._masonryRecomputeTimer);
+    this._masonryRecomputeTimer = setTimeout(() => {
+      if (this.zoomState.isActive) return;
+      const gap    = this.config.currentGap;
+      const layout = this._masonryLayout(gap);
+      let anyChanged = false;
+      this.gridItems.forEach((itemData, i) => {
+        if (i >= layout.items.length) return;
+        const { x, y, height, col } = layout.items[i];
+        if (itemData.baseX !== x || itemData.baseY !== y || itemData._masonryHeight !== height) {
+          itemData.baseX          = x;
+          itemData.baseY          = y;
+          itemData.col            = col;
+          itemData._masonryHeight = height;
+          gsap.to(itemData.element, { duration: 0.4, left: x, top: y, height, ease: 'power2.inOut' });
+          anyChanged = true;
+        }
+      });
+      if (anyChanged) {
+        this._masonryTotalWidth  = layout.totalWidth;
+        this._masonryTotalHeight = layout.totalHeight;
+        gsap.to(this.canvasWrapper, { duration: 0.4, width: layout.totalWidth, height: layout.totalHeight, ease: 'power2.inOut' });
+        this.initDraggable();
+      }
+    }, 300);
   }
   handleZoomKeys(e) {
     if (!this.zoomState.isActive) return;
@@ -1351,17 +1404,22 @@ class FashionGallery {
    */
   _animateGapTransition(newGap, duration = 1.0) {
     if (newGap === this.config.currentGap) return;
-    this.gridItems.forEach((itemData) => {
-      const newX = itemData.col * (this.config.itemWidth + newGap);
-      const newY = itemData.row * (this.config.itemHeight + newGap);
-      itemData.baseX = newX;
-      itemData.baseY = newY;
-      gsap.to(itemData.element, { duration, left: newX, top: newY, ease: this.customEase });
+    const layout = this._masonryLayout(newGap);
+    this.gridItems.forEach((itemData, i) => {
+      if (i >= layout.items.length) return;
+      const { x, y, height, col } = layout.items[i];
+      itemData.baseX          = x;
+      itemData.baseY          = y;
+      itemData.col            = col;
+      itemData._masonryHeight = height;
+      gsap.to(itemData.element, { duration, left: x, top: y, height, ease: this.customEase });
     });
-    const newWidth  = this.config.cols * (this.config.itemWidth  + newGap) - newGap;
-    const newHeight = this.config.rows * (this.config.itemHeight + newGap) - newGap;
-    gsap.to(this.canvasWrapper, { duration, width: newWidth, height: newHeight, ease: this.customEase });
-    this.config.currentGap = newGap;
+    gsap.to(this.canvasWrapper, {
+      duration, width: layout.totalWidth, height: layout.totalHeight, ease: this.customEase
+    });
+    this.config.currentGap       = newGap;
+    this._masonryTotalWidth      = layout.totalWidth;
+    this._masonryTotalHeight     = layout.totalHeight;
   }
   /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0, zooms toward pinch midpoint. */
   initPinchZoom() {
@@ -1571,14 +1629,11 @@ initDraggable() {
     }
   }
   calculateFitZoom() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const currentGap = this.calculateGapForZoom(1.0);
-    const gridWidth =
-      this.config.cols * (this.config.itemWidth + currentGap) - currentGap;
-    const gridHeight =
-      this.config.rows * (this.config.itemHeight + currentGap) - currentGap;
-    const zoomToFitWidth = vw / gridWidth;
+    const vw  = window.innerWidth;
+    const vh  = window.innerHeight;
+    const gap = this.calculateGapForZoom(1.0);
+    const { totalWidth: gridWidth, totalHeight: gridHeight } = this._masonryLayout(gap);
+    const zoomToFitWidth  = vw / gridWidth;
     const zoomToFitHeight = vh / gridHeight;
     const fitZoom = Math.max(zoomToFitWidth, zoomToFitHeight);
     return Math.max(0.1, Math.min(2.0, fitZoom));
@@ -1644,12 +1699,10 @@ initDraggable() {
         this.controlsContainer.classList.add("visible");
     };
 
-    // Calculate distance from grid center for each item (0 = center, 1 = edge)
-    const rows = this.config.rows;
-    const cols = this.config.cols;
-    const centerRow = (rows - 1) / 2;
-    const centerCol = (cols - 1) / 2;
-    const maxDist = Math.sqrt(centerRow * centerRow + centerCol * centerCol) || 1;
+    // Calculate distance from masonry grid center for each item (0 = center, 1 = edge)
+    const gridCX = this._masonryTotalWidth  / 2;
+    const gridCY = this._masonryTotalHeight / 2;
+    const maxDist = Math.sqrt(gridCX * gridCX + gridCY * gridCY) || 1;
 
     // Pre-compute per-item delay and duration based on distance from center + jitter
     let maxFinish = 0;
@@ -1657,7 +1710,9 @@ initDraggable() {
     const delays    = [];
     const durations = [];
     this.gridItems.forEach((itemData) => {
-      const dist     = Math.sqrt((itemData.row - centerRow) ** 2 + (itemData.col - centerCol) ** 2);
+      const dx       = (itemData.baseX + this.config.itemWidth / 2) - gridCX;
+      const dy       = (itemData.baseY + (itemData._masonryHeight || this.config.itemHeight) / 2) - gridCY;
+      const dist     = Math.sqrt(dx * dx + dy * dy);
       const normDist = dist / maxDist;
       const delay    = Math.max(0, normDist * 2.0 + (Math.random() - 0.5) * 0.3);
       const dur      = 0.5 + normDist * 0.4 + Math.random() * 0.2;
@@ -1824,29 +1879,28 @@ initDraggable() {
 
     // Setup event listeners
     this.setupEventListeners();
-
-    // Fade in viewport, then play animations
+  }
+  _rebuildMasonryLayout() {
+    this.generateGridItems();
+    this.calculateGridDimensions(this.config.currentGap);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const { scaledWidth, scaledHeight } = this.gridDimensions;
+    const cx = (vw - scaledWidth) / 2;
+    const cy = (vh - scaledHeight) / 2;
+    gsap.set(this.canvasWrapper, { x: cx, y: cy });
+    this.lastValidPosition.x = cx;
+    this.lastValidPosition.y = cy;
+  }
+  _startReveal() {
     gsap.to(this.viewport, {
       duration: 0.6,
       opacity: 1,
       ease: "power2.inOut",
       onComplete: () => {
         this.playIntroAnimation();
-
-        gsap.to(".header", {
-          duration: 1.2,
-          opacity: 1,
-          ease: "power2.out",
-          delay: 0.8
-        });
-
-        gsap.to(".footer", {
-          duration: 1.4,
-          opacity: 1,
-          ease: "power2.out",
-          delay: 1
-        });
-
+        gsap.to(".header", { duration: 1.2, opacity: 1, ease: "power2.out", delay: 0.8 });
+        gsap.to(".footer", { duration: 1.4, opacity: 1, ease: "power2.out", delay: 1 });
         setTimeout(() => {
           this.initDraggable();
           this.setupViewportObserver();
@@ -1939,46 +1993,38 @@ let gallery;
 document.addEventListener("DOMContentLoaded", () => {
   const preloader = new PreloaderManager();
 
-  // Start initialising the gallery immediately so DOM & layout work
-  // happens behind the preloader overlay
+  // Build gallery (grid uses default 4:3 ratios initially; viewport hidden)
   gallery = new FashionGallery();
   gallery.init();
   initMobileMenu();
 
-  // Preload only the thumbnails that are actually visible on screen
-  // after the initial centered layout, instead of all full-res images
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const zoom = gallery.config.currentZoom;
-  const ox = gallery.lastValidPosition.x;
-  const oy = gallery.lastValidPosition.y;
-  const preloadSrcs = gallery.gridItems
-    .filter((item) => {
-      const sx = ox + item.baseX * zoom;
-      const sy = oy + item.baseY * zoom;
-      const sw = gallery.config.itemWidth * zoom;
-      const sh = gallery.config.itemHeight * zoom;
-      return sx + sw > 0 && sx < vw && sy + sh > 0 && sy < vh;
-    })
-    .map((item) => gallery.toThumbPath(item.imageUrl));
+  // Preload first ~50 thumbnails and capture their true aspect ratios
+  const thumbsToPreload = gallery.fashionImages
+    .slice(0, 50)
+    .map(url => gallery.toThumbPath(url));
+
   const preloadPromise = Promise.all(
-    preloadSrcs.map(
-      (src) =>
-        new Promise((resolve) => {
-          const img = new Image();
-          img.onload = resolve;
-          img.onerror = resolve; // don't block on failure
-          img.src = src;
-        })
-    )
+    thumbsToPreload.map(src => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight) {
+          gallery._aspectCache.set(src, img.naturalWidth / img.naturalHeight);
+        }
+        resolve();
+      };
+      img.onerror = resolve;
+      img.src = src;
+    }))
   );
 
-  // Minimum animation time so the preloader doesn't flash away
   const minTimePromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // Reveal only when both the first thumbnails AND the minimum time are done
+  // Once thumbnails + min time are done, rebuild masonry with real ratios, then reveal
   Promise.all([preloadPromise, minTimePromise]).then(() => {
-    preloader.complete();
+    gallery._rebuildMasonryLayout();
+    preloader.complete(() => {
+      gallery._startReveal();
+    });
   });
 });
 

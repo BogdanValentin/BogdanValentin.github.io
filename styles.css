@@ -382,7 +382,7 @@ h3 {
 .grid-item img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   user-select: none;
   pointer-events: none;
