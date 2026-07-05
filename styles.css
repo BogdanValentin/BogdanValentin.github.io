@@ -1663,8 +1663,9 @@ body.controls-overlap .info-section {
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Suppress the global white-fill link hover — must stay active on touch
+   too, where a tap briefly triggers :hover */
 .ct-channel:hover {
-  padding-left: 1.1rem;
   color: inherit;
   mix-blend-mode: normal;
 }
@@ -1673,8 +1674,17 @@ body.controls-overlap .info-section {
   width: 0;
 }
 
-.ct-channel:hover::before {
-  transform: scaleY(1);
+/* Hover flourishes only on devices with a real pointer: on touch the
+   sticky :hover after a tap shifts the row (padding-left) and the
+   overflow:hidden container cuts the text off */
+@media (hover: hover) {
+  .ct-channel:hover {
+    padding-left: 1.1rem;
+  }
+
+  .ct-channel:hover::before {
+    transform: scaleY(1);
+  }
 }
 
 .ct-channel-id {
@@ -1694,23 +1704,28 @@ body.controls-overlap .info-section {
   transition: color 0.3s ease;
   position: relative;
   display: inline-block;
+  /* Long values (email) must wrap on narrow screens, not clip */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
-.ct-channel:hover .ct-channel-value {
-  color: #fff;
-}
+@media (hover: hover) {
+  .ct-channel:hover .ct-channel-value {
+    color: #fff;
+  }
 
-/* glitch slice on hover */
-.ct-channel:hover .ct-channel-value::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  color: rgba(166, 75, 35, 0.7);
-  clip-path: polygon(0 28%, 100% 28%, 100% 46%, 0 46%);
-  animation: ctGlitch 0.45s steps(3) forwards;
-  pointer-events: none;
+  /* glitch slice on hover */
+  .ct-channel:hover .ct-channel-value::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    color: rgba(166, 75, 35, 0.7);
+    clip-path: polygon(0 28%, 100% 28%, 100% 46%, 0 46%);
+    animation: ctGlitch 0.45s steps(3) forwards;
+    pointer-events: none;
+  }
 }
 
 @keyframes ctGlitch {
@@ -1739,8 +1754,10 @@ body.controls-overlap .info-section {
   transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ct-channel:hover .ct-channel-bar span {
-  width: 100%;
+@media (hover: hover) {
+  .ct-channel:hover .ct-channel-bar span {
+    width: 100%;
+  }
 }
 
 /* ── Sector coordinates ──────────────────────────── */
