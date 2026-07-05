@@ -10,6 +10,8 @@ const TRANSLATIONS = {
     about: "About",
     contact: "Contact",
     throttleUp: "Throttle up",
+    iabHint: "Instagram's browser limits this site",
+    iabOpen: "Open in browser ↗",
 
     aboutHeading: "About",
     aboutLine1: "backend developer,",
@@ -54,6 +56,8 @@ const TRANSLATIONS = {
     about: "Despre",
     contact: "Contact",
     throttleUp: "Inapoi sus",
+    iabHint: "Browserul din Instagram limiteaza site-ul",
+    iabOpen: "Deschide in browser ↗",
 
     aboutHeading: "Despre",
     aboutLine1: "backend developer,",

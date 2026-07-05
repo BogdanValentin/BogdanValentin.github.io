@@ -43,6 +43,56 @@ body.dragging {
   cursor: grabbing;
 }
 
+/* ===== IN-APP BROWSER BANNER (created by escape-browser.js) ===== */
+.iab-banner {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100001; /* above the preloader overlay */
+  display: flex;
+  align-items: center;
+  max-width: min(92vw, 420px);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(var(--accent-rgb), 0.5);
+  border-radius: 0.5em;
+  font-family: "TheGoodMonolith", monospace;
+}
+
+.iab-banner-link {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0.6em 0.2em 0.6em 0.9em;
+  text-decoration: none;
+}
+
+.iab-banner-hint {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.iab-banner-action {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--accent-rgb));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.iab-banner-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0.8em 0.75em;
+  cursor: pointer;
+}
+
 body.zoom-mode {
   cursor: default;
 }
@@ -2064,6 +2114,13 @@ body.controls-overlap .info-section {
   /* Grid items on mobile */
   .grid-item {
     cursor: default;
+  }
+
+  /* Don't keep the huge canvas permanently promoted: WebView (in-app
+     browsers) evicts raster tiles of oversized layers under memory
+     pressure, which flickers. GSAP still composites it while animating. */
+  .canvas-wrapper {
+    will-change: auto;
   }
 
   /* Ensure body allows touch on canvas */
