@@ -204,6 +204,10 @@ class FashionGallery {
     this.centerEase = CustomEase.create("center", ".25,.46,.45,.94");
     // Detect mobile
     this.isMobile = window.innerWidth <= CONSTANTS.BREAKPOINT_MOBILE || ('ontouchstart' in window && window.innerWidth <= 1024);
+    // Last seen viewport size — used to ignore height-only resizes caused by
+    // in-app browser chrome (Instagram/Facebook WebView) showing/hiding bars
+    this._lastVW = window.innerWidth;
+    this._lastVH = window.innerHeight;
     // Configuration — grid adapts to aspect ratio
     this.config = {
       itemWidth: this.isMobile ? CONSTANTS.GRID.WIDTH_MOBILE : CONSTANTS.GRID.WIDTH,
@@ -291,7 +295,7 @@ class FashionGallery {
     this.config.baseGap    = this.isMobile ? 10 : 16;
   }
   _handleResize() {
-    if (this.zoomState.isActive || this._pinchActive) return;
+    if (this.zoomState.isActive || this._pinchActive || this._isDragging) return;
     this._updateConfigForViewport();
     this.setGridShape();
     const fitZoom = this.calculateFitZoom();
@@ -460,7 +464,9 @@ class FashionGallery {
       {
         root: null,
         threshold: 0.05,
-        rootMargin: "20%"
+        // Generous margin so culling toggles happen far off-screen — with a
+        // tight margin, fast drags flash tiles at the viewport edges
+        rootMargin: "75%"
       }
     );
     // Observe all grid items
@@ -732,6 +738,9 @@ class FashionGallery {
     if (this._masonryRecomputeTimer) clearTimeout(this._masonryRecomputeTimer);
     this._masonryRecomputeTimer = setTimeout(() => {
       if (this.zoomState.isActive) return;
+      // Relayouting mid-gesture makes tiles jump and initDraggable() below
+      // would kill the active drag — re-defer until the gesture ends
+      if (this._isDragging || this._pinchActive) { this._scheduleMasonryRecompute(); return; }
       const gap    = this.config.currentGap;
       const layout = this._masonryLayout(gap);
       let anyChanged = false;
@@ -1921,6 +1930,19 @@ initDraggable() {
     window.addEventListener("resize", () => {
       clearTimeout(this._resizeTimer);
       this._resizeTimer = setTimeout(() => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        // In-app browsers (Instagram/Facebook WebView) resize the viewport
+        // whenever their chrome bars show/hide — width stays the same.
+        // Rebuilding the grid for those makes every image flash, so only
+        // refresh the drag bounds and keep the DOM untouched.
+        if (this.isMobile && vw === this._lastVW) {
+          this._lastVH = vh;
+          if (this.draggable) this._dragBounds = this.calculateBounds();
+          return;
+        }
+        this._lastVW = vw;
+        this._lastVH = vh;
         this._handleResize();
         this._checkFooterOverlap();
       }, 150);

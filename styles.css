@@ -361,7 +361,8 @@ h3 {
   position: absolute;
   width: 400px;
   height: 300px;
-  background: transparent;
+  /* Dark placeholder so lazy-loading tiles don't read as holes/flicker */
+  background: #101010;
   cursor: pointer;
   z-index: 1;
   opacity: 1;
@@ -370,9 +371,17 @@ h3 {
   overflow: hidden;
 }
 
+/* No content-visibility here: discarding the rendered subtree while the
+   canvas is being transformed forces re-rasterization and flickers badly
+   in Android WebViews (in-app browsers). Opacity alone still skips paint. */
 .grid-item.out-of-view {
   opacity: 0;
-  content-visibility: hidden;
+}
+
+/* While panning, culling toggles must snap instead of running half-second
+   fades that are visible at the viewport edges */
+body.dragging .grid-item {
+  transition: none;
 }
 
 .grid-item.selected {
@@ -405,13 +414,15 @@ h3 {
   z-index: 2;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
+/* backdrop-filter only while shown — a permanent full-viewport backdrop
+   layer above the animated canvas flickers in Android WebViews */
 .split-screen-container.active {
   opacity: 1;
   pointer-events: all;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .split-left {
@@ -823,8 +834,8 @@ body.controls-overlap .info-section {
   grid-template-rows: 1fr auto;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* No backdrop-filter: the 0.97 background makes it invisible anyway, and a
+     permanent full-viewport backdrop layer flickers in Android WebViews */
 }
 
 .category-index-close {
@@ -1889,6 +1900,14 @@ body.controls-overlap .info-section {
     left: 1.25rem;
     z-index: 10002;
     background: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Backdrop-filtered chips floating over the constantly-transformed canvas
+     trigger compositor flicker in Android WebViews (in-app browsers) */
+  .lang-toggle,
+  .hamburger-btn {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .lang-toggle--menu,
