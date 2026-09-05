@@ -238,7 +238,6 @@ class FashionGallery {
     this._isDragging = false;
     this._isAnimating = false;
     this._pinchJustEnded = false;
-    this._pinchActive = false;
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
@@ -295,7 +294,7 @@ class FashionGallery {
     this.config.baseGap    = this.isMobile ? 10 : 16;
   }
   _handleResize() {
-    if (this.zoomState.isActive || this._pinchActive || this._isDragging) return;
+    if (this.zoomState.isActive || this._isDragging) return;
     this._updateConfigForViewport();
     this.setGridShape();
     const fitZoom = this.calculateFitZoom();
@@ -738,9 +737,9 @@ class FashionGallery {
     if (this._masonryRecomputeTimer) clearTimeout(this._masonryRecomputeTimer);
     this._masonryRecomputeTimer = setTimeout(() => {
       if (this.zoomState.isActive) return;
-      // Relayouting mid-gesture makes tiles jump and initDraggable() below
-      // would kill the active drag — re-defer until the gesture ends
-      if (this._isDragging || this._pinchActive) { this._scheduleMasonryRecompute(); return; }
+      // Relayouting mid-drag makes tiles jump and initDraggable() below
+      // would kill the active drag — re-defer until the drag ends
+      if (this._isDragging) { this._scheduleMasonryRecompute(); return; }
       const gap    = this.config.currentGap;
       const layout = this._masonryLayout(gap);
       let anyChanged = false;
@@ -1430,91 +1429,35 @@ class FashionGallery {
     this._masonryTotalWidth      = layout.totalWidth;
     this._masonryTotalHeight     = layout.totalHeight;
   }
-  /** Pinch-to-zoom for mobile — clamped between fitZoom and 1.0, zooms toward pinch midpoint. */
-  initPinchZoom() {
-    let startDist = 0;
-    let startZoom = this.config.currentZoom;
-    let startX = 0, startY = 0;       // canvas position at gesture start
-    let startMidX = 0, startMidY = 0; // finger midpoint at gesture start
-
-    const getDistance = (touches) => {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    // Capture phase: fires before GSAP's bubble-phase listeners on canvasWrapper,
-    // so _pinchJustEnded is true before GSAP's tap detection runs.
+  /** Mobile: no gesture zoom at all — the three buttons are the only way to change zoom. */
+  initGestureZoomBlock() {
+    // GSAP ignores movement while a second finger is down, so a two-finger
+    // gesture scores as a tap and would open a photo. Capture phase fires
+    // before GSAP's bubble-phase listeners on canvasWrapper, so the flag is
+    // already set when its tap detection runs.
     this.viewport.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        if (this._isAnimating) return;
-        this._pinchActive = true;
+      if (e.touches.length >= 2) {
         this._pinchJustEnded = true;
         clearTimeout(this._pinchEndTimer);
-        startDist = getDistance(e.touches);
-        startZoom = this.config.currentZoom;
-        // Snapshot canvas state so touchmove can zoom relative to this baseline
-        startX = this.lastValidPosition.x;
-        startY = this.lastValidPosition.y;
-        startMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        startMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       }
     }, { capture: true, passive: true });
 
-    this.viewport.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 2 || this.zoomState.isActive || startDist === 0 || this._isAnimating) return;
-      e.preventDefault();
-
-      this._switchButtons.forEach((btn) => btn.classList.remove("switch-button-current"));
-
-      const dist = getDistance(e.touches);
-      const fitZoom = this.calculateFitZoom();
-      let newZoom = Math.max(fitZoom, Math.min(1.0, startZoom * (dist / startDist)));
-
-      // Current midpoint between fingers
-      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
-      let newX, newY;
-      if (newZoom <= fitZoom + 0.005) {
-        // At minimum zoom, snap to center so the grid can't drift off-screen
-        this.calculateGridDimensions(this.config.currentGap);
-        const { scaledWidth, scaledHeight } = this.gridDimensions;
-        newX = (window.innerWidth  - scaledWidth)  / 2;
-        newY = (window.innerHeight - scaledHeight) / 2;
-      } else {
-        // Zoom toward the pinch midpoint:
-        // find which canvas point was under the start-midpoint, keep it there
-        const canvasOriginX = (startMidX - startX) / startZoom;
-        const canvasOriginY = (startMidY - startY) / startZoom;
-        newX = midX - canvasOriginX * newZoom;
-        newY = midY - canvasOriginY * newZoom;
-      }
-
-      this.config.currentZoom = newZoom;
-      this.lastValidPosition.x = newX;
-      this.lastValidPosition.y = newY;
-      gsap.set(this.canvasWrapper, { scale: newZoom, x: newX, y: newY });
-      this.updatePercentageIndicator(newZoom);
-    }, { passive: false });
-
     this.viewport.addEventListener('touchend', (e) => {
-      if (e.touches.length < 2 && startDist > 0) {
-        startDist = 0;
-        this._pinchJustEnded = true;
-        clearTimeout(this._pinchEndTimer);
+      if (e.touches.length === 0 && this._pinchJustEnded) {
         e.preventDefault();
-        this.finalizeScrollZoom(this.config.currentZoom);
-      }
-      if (e.touches.length === 0) {
-        this._pinchActive = false;
-        if (this._pinchJustEnded) {
-          e.preventDefault();
-          clearTimeout(this._pinchEndTimer);
-          this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
-        }
+        clearTimeout(this._pinchEndTimer);
+        this._pinchEndTimer = setTimeout(() => { this._pinchJustEnded = false; }, 400);
       }
     }, { passive: false });
+
+    // iOS Safari ignores user-scalable=no and won't honour touch-action for
+    // pinch — cancelling its gesture events is the only lever, and document
+    // level covers the header/controls/index overlays too, not just the canvas.
+    // Touch-only so a narrow desktop Safari window keeps its trackpad zoom.
+    if ('ontouchstart' in window) {
+      document.addEventListener('gesturestart',  (e) => e.preventDefault(), { passive: false });
+      document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
+    }
   }
   calculateBounds() {
     const vw = window.innerWidth;
@@ -1978,11 +1921,11 @@ initDraggable() {
 
     // Zoom control buttons — zoom sounds already play via setZoom/autoFitZoom
 
-    // Scroll-wheel zoom (desktop) / pinch zoom (mobile)
+    // Scroll-wheel zoom (desktop) / gesture-zoom block (mobile)
     if (!this.isMobile) {
       this.initScrollZoom();
     } else {
-      this.initPinchZoom();
+      this.initGestureZoomBlock();
     }
 
     // Swipe to navigate photos in zoom mode (touch devices)
