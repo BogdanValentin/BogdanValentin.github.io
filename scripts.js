@@ -766,11 +766,9 @@ class FashionGallery {
   handleZoomKeys(e) {
     if (!this.zoomState.isActive) return;
     if (e.key === "Escape") {
-      if (this.zoomState.isFullscreen) {
-        this.exitFullscreen();
-      } else {
-        this.exitZoomMode();
-      }
+      // Close the photo outright — exitZoomMode's onComplete already unwinds
+      // the fullscreen state, and leaves native fullscreen alone in viewMode 2
+      this.exitZoomMode();
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
       this.navigateZoom(1);
@@ -798,7 +796,9 @@ class FashionGallery {
       }
       return;
     }
-    if (mode === prev) return;
+    // Same-button click still repairs a desynced layout (e.g. after Escape
+    // used to drop out of fullscreen while leaving viewMode untouched)
+    if (mode === prev && this.zoomState.isFullscreen === (mode > 0)) return;
     if (mode === 0) {
       this.exitFullscreen();
     } else if (mode === 1) {
