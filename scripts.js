@@ -261,6 +261,11 @@ class FashionGallery {
     this._closingFromPopstate = false;
     this._selfInitiatedBack = false;
     this._aspectCache = new Map(); // thumbUrl → aspectRatio
+    // Seeded from photo-ratios.js so the very first masonry layout is already
+    // final. Anything missing falls back to 4:3 and is corrected on load.
+    if (typeof PHOTO_RATIOS !== 'undefined') {
+      for (const path in PHOTO_RATIOS) this._aspectCache.set(path, PHOTO_RATIOS[path]);
+    }
     this._masonryTotalWidth  = 0;
     this._masonryTotalHeight = 0;
     // Bound event handler references (so removeEventListener works)
@@ -2015,29 +2020,16 @@ document.addEventListener("DOMContentLoaded", () => {
   gallery.init();
   initMobileMenu();
 
-  // Preload first ~50 thumbnails and capture their true aspect ratios
-  const thumbsToPreload = gallery.fashionImages
-    .slice(0, 50)
-    .map(url => gallery.toThumbPath(url));
-
-  const preloadPromise = Promise.all(
-    thumbsToPreload.map(src => new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.naturalWidth && img.naturalHeight) {
-          gallery._aspectCache.set(src, img.naturalWidth / img.naturalHeight);
-        }
-        resolve();
-      };
-      img.onerror = resolve;
-      img.src = src;
-    }))
-  );
-
+  // Ratios come from photo-ratios.js now, so there is nothing to probe. The
+  // old eager preload fetched the first 50 images of the array; init() centres
+  // the canvas on the MIDDLE of the grid, so those overlapped the tiles
+  // actually on screen by a mean of 0.03 tiles — 2.2 MB spent competing for
+  // bandwidth with the viewport observer that was loading the real ones.
   const minTimePromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // Once thumbnails + min time are done, rebuild masonry with real ratios, then reveal
-  Promise.all([preloadPromise, minTimePromise]).then(() => {
+  minTimePromise.then(() => {
+    // Cheap no-op when every ratio was already seeded; still corrects any
+    // thumbnail missing from the map.
     gallery._rebuildMasonryLayout();
     preloader.complete(() => {
       gallery._startReveal();
