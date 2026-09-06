@@ -124,9 +124,18 @@ body.zoom-mode #activeCategoryLabel {
   cursor: pointer;
 }
 
-/* Preloader identity mark */
+/* Preloader identity mark. The overlay is a flex column, so the ring has to be
+   allowed to shrink or the two together clip on a landscape phone (~320px tall). */
+#preloader-overlay canvas {
+  width: min(300px, 55vh, 70vw);
+  height: auto;
+  aspect-ratio: 1;
+}
+
 .preloader-mark {
   margin-top: 1.5rem;
+  max-width: 100%;
+  padding: 0 1rem;
   text-align: center;
   font-family: "TheGoodMonolith", monospace;
   text-transform: uppercase;
@@ -2011,6 +2020,11 @@ body.controls-overlap .info-section {
     left: 1.25rem;
     z-index: 10000;
     pointer-events: none;
+    /* Sits over whatever photograph happens to be under it — the same scrim
+       .lang-toggle uses on mobile, for the same reason */
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 0.4em;
+    padding: 0.4em 0.6em;
     font-family: "TheGoodMonolith", monospace;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -2029,8 +2043,11 @@ body.controls-overlap .info-section {
     color: rgba(255, 255, 255, 0.45);
   }
 
-  /* An open photo owns the screen */
-  body.zoom-mode .mobile-identity {
+  /* An open photo owns the screen. The hamburger is z-index 10002 against the
+     photo overlay's 2, so without this it floats over the picture — and lets
+     the index open on top of an open photo, which nothing else expects. */
+  body.zoom-mode .mobile-identity,
+  body.zoom-mode .hamburger-btn {
     display: none;
   }
 
