@@ -28,10 +28,10 @@
 //    photos/<cat>/thumbs/   — 640px long-edge, q80  (grid)
 //    photos/<cat>/full/     — 1920px long-edge, q85 (zoom view)
 //
-//  Dependencies: GSAP 3 (core, Draggable, CustomEase, Flip)
+//  Dependencies: GSAP 3 (core, Draggable, CustomEase)
 // ========================================================
 
-gsap.registerPlugin(Draggable, CustomEase, Flip);
+gsap.registerPlugin(Draggable, CustomEase);
 
 function shuffleArray(arr) {
   const a = arr.slice();
