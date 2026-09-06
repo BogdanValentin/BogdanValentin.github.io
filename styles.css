@@ -107,6 +107,33 @@ body.zoom-mode #activeCategoryLabel {
   cursor: pointer;
 }
 
+/* Preloader identity mark */
+.preloader-mark {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-family: "TheGoodMonolith", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.6;
+}
+
+.preloader-mark-name {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.preloader-mark-role {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Identity mark — shown only under 768px, where .header is hidden */
+.mobile-identity {
+  display: none;
+}
+
 /* Header and Footer */
 .header,
 .footer {
@@ -1957,6 +1984,36 @@ body.controls-overlap .info-section {
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   .header {
+    display: none;
+  }
+
+  .mobile-identity {
+    display: block;
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 10000;
+    pointer-events: none;
+    font-family: "TheGoodMonolith", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.45;
+  }
+
+  .mobile-identity-name {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .mobile-identity-role {
+    display: block;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  /* An open photo owns the screen */
+  body.zoom-mode .mobile-identity {
     display: none;
   }
 

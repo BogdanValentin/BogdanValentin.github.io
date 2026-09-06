@@ -67,6 +67,7 @@ class PreloaderManager {
       height: 100%;
       background: #000;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 100000;
@@ -78,6 +79,20 @@ class PreloaderManager {
 
     this.ctx = this.canvas.getContext("2d");
     this.overlay.appendChild(this.canvas);
+
+    // The gate is ~2.8s long either way — it may as well say whose site this is
+    const mark = document.createElement("div");
+    mark.className = "preloader-mark";
+    const name = document.createElement("span");
+    name.className = "preloader-mark-name";
+    name.textContent = "Craia Bogdan-Valentin";
+    const role = document.createElement("span");
+    role.className = "preloader-mark-role";
+    role.textContent = typeof window.t === "function"
+      ? window.t("identityRole")
+      : "photographer, Bucharest";
+    mark.append(name, role);
+    this.overlay.appendChild(mark);
 
     this.startAnimation();
   }
