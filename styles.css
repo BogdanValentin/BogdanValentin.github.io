@@ -2037,12 +2037,6 @@ body.controls-overlap .info-section {
     color: rgba(255, 255, 255, 0.85);
   }
 
-  .mobile-identity-role {
-    display: block;
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.45);
-  }
-
   /* An open photo owns the screen. The hamburger is z-index 10002 against the
      photo overlay's 2, so without this it floats over the picture — and lets
      the index open on top of an open photo, which nothing else expects. */
