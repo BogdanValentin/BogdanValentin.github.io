@@ -1,12 +1,29 @@
-@import url("https://fonts.cdnfonts.com/css/thegoodmonolith");
-@import url("https://fonts.googleapis.com/css?family=Jura:400");
-
+/* Fonts are self-hosted. These used to be two render-blocking @imports
+   (fonts.cdnfonts.com, Google Fonts) and a hotlink to a personal CodePen
+   asset slot — three third parties on the critical path, any one of which
+   could take the site's whole typographic identity with it. */
 @font-face {
   font-family: "PPNeueMontreal";
-  src: url("https://assets.codepen.io/7558/PPNeueMontreal-Variable.woff2")
-    format("woff2");
+  src: url("fonts/PPNeueMontreal-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TheGoodMonolith";
+  src: url("fonts/TheGoodMonolith.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jura";
+  src: url("fonts/Jura-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root {
