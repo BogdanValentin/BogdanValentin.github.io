@@ -256,6 +256,10 @@ class FashionGallery {
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
+    // Back-button bookkeeping — see initHistoryNav()
+    this._historyDepth = 0;
+    this._closingFromPopstate = false;
+    this._selfInitiatedBack = false;
     this._aspectCache = new Map(); // thumbUrl → aspectRatio
     this._masonryTotalWidth  = 0;
     this._masonryTotalHeight = 0;
@@ -536,6 +540,7 @@ class FashionGallery {
   enterZoomMode(selectedItemData) {
     if (this.zoomState.isActive) return;
     this.zoomState.isActive = true;
+    this._pushOverlayState('photo');
     this.zoomState.selectedItem = selectedItemData;
     // Disable dragging
     if (this.draggable) this.draggable.disable();
@@ -640,6 +645,7 @@ class FashionGallery {
       !this.zoomState.scalingOverlay
     )
       return;
+    this._popOverlayState();
     document.removeEventListener("keydown", this._boundHandleZoomKeys);
     const splitLeft = document.getElementById("splitLeft");
     const splitRight = document.getElementById("splitRight");
@@ -1115,10 +1121,38 @@ class FashionGallery {
       applyUpdate();
     }
   }
+  /**
+   * Back closes the open photo or menu instead of leaving the site.
+   * Each overlay pushes one history entry; closing it by any other means
+   * pops that entry back off, so the stack never drifts.
+   */
+  initHistoryNav() {
+    window.addEventListener('popstate', () => {
+      // A pop we caused ourselves in _popOverlayState — already handled
+      if (this._selfInitiatedBack) { this._selfInitiatedBack = false; return; }
+      this._historyDepth = Math.max(0, this._historyDepth - 1);
+      this._closingFromPopstate = true;
+      if (this.zoomState.isActive) this.exitZoomMode();
+      else if (this.indexOpen) this.closeCategoryIndex();
+      this._closingFromPopstate = false;
+    });
+  }
+  _pushOverlayState(name) {
+    this._historyDepth++;
+    history.pushState({ overlay: name }, '');
+  }
+  _popOverlayState() {
+    if (this._closingFromPopstate) return;
+    if (this._historyDepth === 0) return;
+    this._historyDepth--;
+    this._selfInitiatedBack = true;
+    history.back();
+  }
   openCategoryIndex() {
     const index = document.getElementById('categoryIndex');
     if (!index || this.indexOpen) return;
     this.indexOpen = true;
+    this._pushOverlayState('index');
     index.style.pointerEvents = 'all';
 
     const rows = index.querySelectorAll('.category-row');
@@ -1142,6 +1176,7 @@ class FashionGallery {
   closeCategoryIndex() {
     const index = document.getElementById('categoryIndex');
     if (!index || !this.indexOpen) return;
+    this._popOverlayState();
     const rows = index.querySelectorAll('.category-row');
     const footer = index.querySelector('.category-index-footer');
 
@@ -1945,6 +1980,8 @@ initDraggable() {
 
     // Swipe to navigate photos in zoom mode (touch devices)
     this.initZoomSwipe();
+    // Back closes an overlay rather than leaving the site
+    this.initHistoryNav();
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.indexOpen) { this.closeCategoryIndex(); return; }
