@@ -256,10 +256,9 @@ class FashionGallery {
     this.viewportObserver = null;
     this.activeCategory = 'all';
     this.indexOpen = false;
-    // Back-button bookkeeping — see initHistoryNav()
-    this._historyDepth = 0;
-    this._closingFromPopstate = false;
-    this._selfInitiatedBack = false;
+    // Navigation bookkeeping — see initHistoryNav()
+    this._reconciling = false;
+    this._closingPhoto = false;
     this._aspectCache = new Map(); // thumbUrl → aspectRatio
     // Seeded from photo-ratios.js so the very first masonry layout is already
     // final. Anything missing falls back to 4:3 and is corrected on load.
@@ -545,7 +544,7 @@ class FashionGallery {
   enterZoomMode(selectedItemData) {
     if (this.zoomState.isActive) return;
     this.zoomState.isActive = true;
-    this._pushOverlayState('photo');
+    if (!this._reconciling) this._pushPhotoHash(selectedItemData);
     this.zoomState.selectedItem = selectedItemData;
     // Disable dragging
     if (this.draggable) this.draggable.disable();
@@ -650,7 +649,8 @@ class FashionGallery {
       !this.zoomState.scalingOverlay
     )
       return;
-    this._popOverlayState();
+    this._closingPhoto = true;
+    if (!this._reconciling) this._popPhotoHash();
     document.removeEventListener("keydown", this._boundHandleZoomKeys);
     const splitLeft = document.getElementById("splitLeft");
     const splitRight = document.getElementById("splitRight");
@@ -742,6 +742,7 @@ class FashionGallery {
         const splitRight = document.getElementById('splitRight');
         if (splitRight) gsap.set(splitRight, { opacity: 1 });
         this.zoomState.isActive = false;
+        this._closingPhoto = false;
         this.zoomState.selectedItem = null;
         this.zoomState.flipAnimation = null;
         this._checkFooterOverlap();
@@ -1126,38 +1127,113 @@ class FashionGallery {
       applyUpdate();
     }
   }
-  /**
-   * Back closes the open photo or menu instead of leaving the site.
-   * Each overlay pushes one history entry; closing it by any other means
-   * pops that entry back off, so the stack never drifts.
-   */
+  /* ---- Navigation: the URL is the single source of truth ----------------
+     #/<category> and #/<category>/<filename>. Keyed on the filename, never an
+     index, because initImageData and switchCategory both shuffle — index 47 is
+     a different photograph on every load.
+
+     Only the open photo lives in history. The category index is a transient
+     menu and deliberately stays out of it: that keeps the stack one level
+     deep, so every case (Back, Forward, reload, a pasted link) reduces to the
+     same question — does the UI match the hash? _reconcileToHash is the only
+     place that question is answered.
+
+     Every entry point is wrapped. A malformed link must degrade to "ignored",
+     never to a site that fails to appear. */
   initHistoryNav() {
     window.addEventListener('popstate', () => {
-      // A pop we caused ourselves in _popOverlayState — already handled
-      if (this._selfInitiatedBack) { this._selfInitiatedBack = false; return; }
-      this._historyDepth = Math.max(0, this._historyDepth - 1);
-      this._closingFromPopstate = true;
-      if (this.zoomState.isActive) this.exitZoomMode();
-      else if (this.indexOpen) this.closeCategoryIndex();
-      this._closingFromPopstate = false;
+      try { this._reconcileToHash(); } catch (err) { /* never trap the visitor */ }
     });
   }
-  _pushOverlayState(name) {
-    this._historyDepth++;
-    history.pushState({ overlay: name }, '');
+  _photoSlug(imageUrl) {
+    const file = String(imageUrl || '').split('/').pop() || '';
+    return file.replace(/\.[^.]+$/, '');
   }
-  _popOverlayState() {
-    if (this._closingFromPopstate) return;
-    if (this._historyDepth === 0) return;
-    this._historyDepth--;
-    this._selfInitiatedBack = true;
-    history.back();
+  _parseHash() {
+    const m = /^#\/([^/?#]+)(?:\/([^/?#]+))?/.exec(location.hash || '');
+    if (!m) return null;
+    try {
+      return { cat: decodeURIComponent(m[1]), slug: m[2] ? decodeURIComponent(m[2]) : null };
+    } catch (err) { return null; } // malformed %-escape
+  }
+  _categoryExists(id) {
+    return typeof GALLERY_CATEGORIES !== 'undefined' &&
+      (id === 'all' || GALLERY_CATEGORIES.some(c => c.id === id));
+  }
+  /** The slug of the photo currently on screen, or null. */
+  _openSlug() {
+    if (this._closingPhoto) return null; // mid-close counts as already closed
+    if (!this.zoomState.isActive || !this.zoomState.selectedItem) return null;
+    return this._photoSlug(this.zoomState.selectedItem.imageUrl);
+  }
+  /** Make the UI match location.hash. The only interpreter of history. */
+  _reconcileToHash() {
+    const link = this._parseHash();
+    const want = (link && this._categoryExists(link.cat)) ? link.slug : null;
+    const open = this._openSlug();
+    if (want === open) return;
+
+    this._reconciling = true;
+    try {
+      if (open) {
+        // Closing is animated; swapping straight to another photo mid-tween is
+        // not worth the complexity, so we only ever close here.
+        this.exitZoomMode();
+      } else if (want) {
+        const item = this.gridItems.find(g => this._photoSlug(g.imageUrl) === want);
+        if (item) this.enterZoomMode(item);
+      }
+    } finally {
+      this._reconciling = false;
+    }
+  }
+  _pushPhotoHash(itemData) {
+    try {
+      const slug = this._photoSlug(itemData && itemData.imageUrl);
+      if (slug) {
+        history.pushState(null, '', '#/' + this.activeCategory + '/' + encodeURIComponent(slug));
+      }
+    } catch (err) { /* the URL is cosmetic; never block opening the photo */ }
+  }
+  _popPhotoHash() {
+    try {
+      const link = this._parseHash();
+      if (link && link.slug) history.back();
+    } catch (err) { /* ignore */ }
+  }
+  /** Point the URL and tab title at the active category, without adding history. */
+  _syncHash() {
+    try {
+      const id  = this.activeCategory;
+      const cat = typeof GALLERY_CATEGORIES !== 'undefined'
+        ? GALLERY_CATEGORIES.find(c => c.id === id) : null;
+      const label = cat
+        ? ((window.currentLang === 'ro' && cat.labelRo) ? cat.labelRo : cat.label)
+        : id;
+      document.title = id === 'all'
+        ? 'Craia Bogdan-Valentin — Photography'
+        : label + ' — Craia Bogdan-Valentin';
+      history.replaceState(null, '', id === 'all' ? '#/' : '#/' + id);
+    } catch (err) { /* ignore */ }
+  }
+  /** Honour a #/... link. Runs once the site is already interactive. */
+  _applyDeepLink() {
+    const link = this._parseHash();
+    if (!link || !this._categoryExists(link.cat)) return;
+    // Captured now: _syncHash rewrites the hash to the bare category below.
+    const slug = link.slug;
+    const openIt = () => {
+      if (!slug) return;
+      const item = this.gridItems.find(g => this._photoSlug(g.imageUrl) === slug);
+      if (item) this.enterZoomMode(item); // pushes #/cat/slug back on
+    };
+    if (link.cat === this.activeCategory) { this._syncHash(); openIt(); }
+    else this.switchCategory(link.cat, openIt);
   }
   openCategoryIndex() {
     const index = document.getElementById('categoryIndex');
     if (!index || this.indexOpen) return;
     this.indexOpen = true;
-    this._pushOverlayState('index');
     index.style.pointerEvents = 'all';
 
     const rows = index.querySelectorAll('.category-row');
@@ -1181,7 +1257,6 @@ class FashionGallery {
   closeCategoryIndex() {
     const index = document.getElementById('categoryIndex');
     if (!index || !this.indexOpen) return;
-    this._popOverlayState();
     const rows = index.querySelectorAll('.category-row');
     const footer = index.querySelector('.category-index-footer');
 
@@ -1323,8 +1398,8 @@ class FashionGallery {
     this._panelScrollTarget = null;
   }
 
-  switchCategory(categoryId) {
-    if (categoryId === this.activeCategory) return;
+  switchCategory(categoryId, onDone) {
+    if (categoryId === this.activeCategory) { if (onDone) onDone(); return; }
     if (this.zoomState.isActive) this.exitZoomMode();
     this.activeCategory = categoryId;
 
@@ -1353,9 +1428,9 @@ class FashionGallery {
       label.textContent = categoryId === 'all' ? (window.t ? window.t('allWork') : 'All Work') : (window.currentLang === 'ro' && cat.labelRo ? cat.labelRo : cat.label);
     }
 
-    this.transitionGrid();
+    this.transitionGrid(onDone);
   }
-  transitionGrid() {
+  transitionGrid(onDone) {
     const elements = this.gridItems.map(i => i.element);
     gsap.to(elements, {
       opacity: 0, scale: 0.85, duration: 0.3,
@@ -1380,6 +1455,8 @@ class FashionGallery {
         this.initDraggable();
         // Update zoom UI to reflect the new fit zoom
         this.updatePercentageIndicator(fitZoom);
+        this._syncHash();
+        if (onDone) onDone();
       }
     });
   }
@@ -1911,6 +1988,9 @@ initDraggable() {
         setTimeout(() => {
           this.initDraggable();
           this.setupViewportObserver();
+          // Deep link applied only once the site is interactive, down the same
+          // path a category click takes — a bad link cannot touch the reveal
+          try { this._applyDeepLink(); } catch (err) { /* link is optional */ }
         }, 1500);
       }
     });
@@ -2027,10 +2107,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // bandwidth with the viewport observer that was loading the real ones.
   const minTimePromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
+  // No _rebuildMasonryLayout() here any more: it calls generateGridItems(),
+  // which destroys and recreates all 236 <img> elements — throwing away every
+  // thumbnail decode the preloader window just paid for. With ratios seeded
+  // from photo-ratios.js, init()'s first layout is already the final one, and
+  // any thumbnail missing from the map still self-corrects via the existing
+  // onload path into _scheduleMasonryRecompute.
   minTimePromise.then(() => {
-    // Cheap no-op when every ratio was already seeded; still corrects any
-    // thumbnail missing from the map.
-    gallery._rebuildMasonryLayout();
     preloader.complete(() => {
       gallery._startReveal();
     });
