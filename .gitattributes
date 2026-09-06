@@ -1,0 +1,4 @@
+# Vendored third-party code and binary assets stay byte-identical to upstream
+vendor/** -text
+*.woff  binary
+*.woff2 binary
