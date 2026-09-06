@@ -16,12 +16,12 @@
   --font-size-base: 36px;
 
   /* Accent colour — change here to retheme the whole site */
-  --color-accent: var(--color-accent);
+  --color-accent: rgb(var(--accent-rgb));
   --accent-rgb: 166, 75, 35;   /* used inside rgba() */
 
   /* Borders */
-  --color-border: var(--color-border);
-  --color-border-hover: var(--color-border-hover);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-hover: rgba(255, 255, 255, 0.2);
 }
 
 * {
