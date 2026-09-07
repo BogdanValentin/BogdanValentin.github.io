@@ -1,6 +1,6 @@
 /* Fonts are self-hosted. These used to be two render-blocking @imports
    (fonts.cdnfonts.com, Google Fonts) and a hotlink to a personal CodePen
-   asset slot — three third parties on the critical path, any one of which
+   asset slot: three third parties on the critical path, any one of which
    could take the site's whole typographic identity with it. */
 @font-face {
   font-family: "PPNeueMontreal";
@@ -32,7 +32,7 @@
   --transition-medium: 0.3s ease;
   --font-size-base: 36px;
 
-  /* Accent colour — change here to retheme the whole site */
+  /* Accent colour: change here to retheme the whole site */
   --color-accent: rgb(var(--accent-rgb));
   --accent-rgb: 166, 75, 35;   /* used inside rgba() */
 
@@ -155,7 +155,7 @@ body.zoom-mode #activeCategoryLabel {
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* Identity mark — shown only under 768px, where .header is hidden */
+/* Identity mark: shown only under 768px, where .header is hidden */
 .mobile-identity {
   display: none;
 }
@@ -519,7 +519,7 @@ body.dragging .grid-item {
   pointer-events: none;
 }
 
-/* backdrop-filter only while shown — a permanent full-viewport backdrop
+/* backdrop-filter only while shown. A permanent full-viewport backdrop
    layer above the animated canvas flickers in Android WebViews */
 .split-screen-container.active {
   opacity: 1;
@@ -768,7 +768,7 @@ body.fullscreen-mode .controls-container { left: 50%; }
 
 
 
-/* Hide split/theatre buttons when no photo is selected — only fullscreen visible */
+/* Hide split/theatre buttons when no photo is selected, only fullscreen visible */
 .controls-container.visible:not(.split-mode) #vmBtn0,
 .controls-container.visible:not(.split-mode) #vmBtn1 {
   display: none;
@@ -1006,7 +1006,7 @@ body.controls-overlap .info-section {
   mask-image: none;
 }
 
-/* ---- Category rows — new design ---- */
+/* ---- Category rows: new design ---- */
 .category-row {
   display: flex;
   align-items: center;
@@ -1209,7 +1209,7 @@ body.controls-overlap .info-section {
 }
 
 /* ══════════════════════════════════════════════════
-   ABOUT DOSSIER — SCI-FI REDESIGN
+   ABOUT DOSSIER / SCI-FI REDESIGN
    ══════════════════════════════════════════════════ */
 
 /* ── H1 title ────────────────────────────────────── */
@@ -1593,7 +1593,7 @@ body.controls-overlap .info-section {
 
 
 /* ══════════════════════════════════════════════════
-   CONTACT TERMINAL — SCI-FI REDESIGN
+   CONTACT TERMINAL / SCI-FI REDESIGN
    ══════════════════════════════════════════════════ */
 
 .ct-terminal {
@@ -1716,7 +1716,7 @@ body.controls-overlap .info-section {
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Suppress the global white-fill link hover — must stay active on touch
+/* Suppress the global white-fill link hover, which must stay active on touch
    too, where a tap briefly triggers :hover */
 .ct-channel:hover {
   color: inherit;
@@ -2020,7 +2020,7 @@ body.controls-overlap .info-section {
     left: 1.25rem;
     z-index: 10000;
     pointer-events: none;
-    /* Sits over whatever photograph happens to be under it — the same scrim
+    /* Sits over whatever photograph happens to be under it, using the same scrim
        .lang-toggle uses on mobile, for the same reason */
     background: rgba(0, 0, 0, 0.6);
     border-radius: 0.4em;
@@ -2038,7 +2038,7 @@ body.controls-overlap .info-section {
   }
 
   /* An open photo owns the screen. The hamburger is z-index 10002 against the
-     photo overlay's 2, so without this it floats over the picture — and lets
+     photo overlay's 2, so without this it floats over the picture, and lets
      the index open on top of an open photo, which nothing else expects. */
   body.zoom-mode .mobile-identity,
   body.zoom-mode .hamburger-btn {
@@ -2186,7 +2186,7 @@ body.controls-overlap .info-section {
 
 
 
-  /* Image nav buttons on mobile — bottom row, inline with mute */
+  /* Image nav buttons on mobile: bottom row, inline with mute */
   .image-nav-btn {
     width: 52px;
     height: 52px;
@@ -2236,7 +2236,7 @@ body.controls-overlap .info-section {
     cursor: default;
   }
 
-  /* Category Index — mobile */
+  /* Category Index: mobile */
   .category-index-inner {
     padding: 0 1.5rem;
     flex-direction: column;

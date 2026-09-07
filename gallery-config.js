@@ -10,10 +10,10 @@
 //
 //  Category schema:
 //    {
-//      id:     string   — unique slug used in code and URL
-//      label:  string   — display name shown in the category index
-//      cover:  string   — path to the hero/preview image
-//      images: string[] — paths to the original photos (thumbs/full
+//      id:     string     unique slug used in code and URL
+//      label:  string     display name shown in the category index
+//      cover:  string     path to the hero/preview image
+//      images: string[]   paths to the original photos (thumbs/full
 //                         variants are resolved automatically by the JS)
 //    }
 //

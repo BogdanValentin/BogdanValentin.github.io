@@ -2,7 +2,7 @@
 // Generated from the files themselves with:
 //   find photos -path '*/thumbs/*' -type f -print0 | xargs -0 magick identify -format '%d/%f|%w|%h'
 // Seeded into the gallery's _aspectCache so the very first masonry layout is
-// already correct — no probe requests on boot, and no reflow after load.
+// already correct: no probe requests on boot, and no reflow after load.
 // Re-run after adding photos; a missing entry just falls back to the 4:3
 // default and is corrected on load exactly as it was before.
 const PHOTO_RATIOS = {

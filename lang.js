@@ -1,5 +1,5 @@
 // ============================================================
-//  Language switcher — RO / EN
+//  Language switcher: RO / EN
 //  All translations live in the TRANSLATIONS object below.
 // ============================================================
 
@@ -242,7 +242,7 @@ window.setLanguage = function(lang) {
   applyTranslations(true);
 };
 
-// Set button immediately — already in DOM above this script
+// Set button immediately, it is already in DOM above this script
 updateButton();
 
 // Apply initial translations after DOM + gallery scripts are ready

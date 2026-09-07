@@ -19,7 +19,7 @@
   function escapeUrl() {
     var href = location.href;
     if (isAndroid) {
-      // Asks Android itself (not the app) to open the URL — resolves to the
+      // Asks Android itself (not the app) to open the URL, which resolves to the
       // user's default browser. Fallback returns to this same page.
       return 'intent://' + href.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;action=android.intent.action.VIEW;' +
@@ -40,7 +40,7 @@
       sessionStorage.setItem('iabAutoEscape', '1');
       location.href = escapeUrl();
     }
-  } catch (e) { /* sessionStorage unavailable — banner still offers the tap */ }
+  } catch (e) { /* sessionStorage unavailable, banner still offers the tap */ }
 
   document.addEventListener('DOMContentLoaded', function () {
     try {
